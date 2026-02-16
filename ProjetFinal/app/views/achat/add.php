@@ -1,3 +1,18 @@
+<?php
+
+// use app\controllers\Ville;
+use app\controllers\ProduitController;
+use app\controllers\VilleController;
+
+$villeController = new VilleController();
+$produitController = new ProduitController();
+
+$villes = $villeController->getAllVilles();
+$produits = $produitController->getAllProduits();
+// $regions = $regionModel->getAllRegions();
+?>
+
+
 <section id="reservation">
     <div class="reservation">
         <div class="reservation-left">
