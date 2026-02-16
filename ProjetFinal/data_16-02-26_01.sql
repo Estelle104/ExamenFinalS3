@@ -28,13 +28,13 @@ INSERT INTO produits (nom, id_categorie, prix_unitaire) VALUES
 ('Argent', 3, 1.00);
 
 -- Besoins
-INSERT INTO besoins (description, id_produit, id_ville, quantite) VALUES
-('Besoin de riz', 1, 1, 500),
-('Manque d’huile', 2, 1, 200),
-('Besoin de tôles', 3, 2, 100),
-('Réparation infrastructure', 3, 3, 50),
-('Besoin de clous pour reconstruction', 4, 4, 80),
-('Aide financière pour familles vulnérables', 5, 5, 1000000);
+INSERT INTO besoins (description, id_produit, id_ville, quantite, quantite_restante) VALUES
+('Besoin de riz', 1, 1, 500, 500),
+('Manque d’huile', 2, 1, 200, 200),
+('Besoin de tôles', 3, 2, 100, 100),
+('Réparation infrastructure', 3, 3, 50, 50),
+('Besoin de clous pour reconstruction', 4, 4, 80, 80),
+('Aide financière pour familles vulnérables', 5, 5, 1000000, 1000000);
 
 -- Dons (avec id_ville ajouté)
 INSERT INTO dons (description, id_produit, id_ville, quantite, date_don, donneur) VALUES
