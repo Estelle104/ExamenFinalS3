@@ -4,6 +4,35 @@ CREATE DATABASE bngrc_final_s3;
 
 USE bngrc_final_s3;
 
+CREATE TABLE type_user (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    type_user VARCHAR(50) NOT NULL
+);
+
+INSERT INTO type_user (type_user) VALUES
+('admin'),
+('user');
+
+-- ==========================================
+-- 2. UTILISATEURS
+-- ==========================================
+
+CREATE TABLE users (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    nom VARCHAR(100) NOT NULL,
+    login VARCHAR(100) NOT NULL UNIQUE,
+    mdp VARCHAR(255) NOT NULL,
+    id_type_user INT NOT NULL,
+    FOREIGN KEY (id_type_user) REFERENCES type_user(id)
+);
+
+INSERT INTO users (nom, login, mdp, id_type_user) VALUES
+('Administrateur', 'admin', 'admin123', 1),
+('Jean Rakoto', 'jean', 'jean123', 2),
+('Marie Rasoa', 'marie', 'marie123', 2),
+('Paul Andry', 'paul', 'paul123', 2);
+
+
 CREATE OR REPLACE TABLE regions(
     id INT PRIMARY KEY AUTO_INCREMENT,
     nom VARCHAR(40) NOT NULL
