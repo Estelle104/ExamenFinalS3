@@ -22,20 +22,21 @@ class BesoinController {
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $description = $_POST['description'] ?? '';
             $idProduit = $_POST['id_produit'] ?? 0;
-            $idVille = $_POST['id_ville'] ?? 0;
-            $idRegion = $_POST['id_region'] ?? null;
+            $idVille = !empty($_POST['id_ville']) ? (int)$_POST['id_ville'] : null;
+            $idRegion = !empty($_POST['id_region']) ? (int)$_POST['id_region'] : null;
             $quantite = $_POST['quantite'] ?? 0;
             $dateBesoin = $_POST['date_besoin'] ?? null;
 
-            if ($description && $idProduit && $idVille && $quantite) {
+            // Au moins une localisation (ville ou région) est requise
+            if ($description && $idProduit && $quantite && ($idVille || $idRegion)) {
                 $besoinModel = new Besoin();
-                $besoinModel->addBesoin($description, (int)$idProduit, (int)$idVille, $idRegion ? (int)$idRegion : null, (int)$quantite, $dateBesoin);
+                $besoinModel->addBesoin($description, (int)$idProduit, $idVille, $idRegion, (int)$quantite, $dateBesoin);
 
                 $_SESSION['success'] = 'Besoin created successfully';
                 header('Location: ' . Flight::get('flight.base_url') . '/besoins');
                 exit();
             } else {
-                $_SESSION['error'] = 'Tous les champs obligatoires doivent être remplis';
+                $_SESSION['error'] = 'Description, produit, quantité et au moins une localisation (ville ou région) sont requis';
             }
         }
 
