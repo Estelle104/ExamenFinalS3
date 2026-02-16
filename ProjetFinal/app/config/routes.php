@@ -1,6 +1,11 @@
 <?php
 
 use app\controllers\UserController;
+use app\controllers\RegionController;
+use app\controllers\VilleController;
+use app\controllers\BesoinController;
+use app\controllers\DonController;
+use app\controllers\DashboardController;
 use flight\net\Router;
 use flight\Engine;
 
@@ -49,5 +54,24 @@ $router->group('', function(Router $router) use ($app) {
         ]);
     });
    
+    // Routes CRUD
+    $router->get('/regions', [RegionController::class, 'list']);
+    $router->get('/regions/add', [RegionController::class, 'add']);
+    $router->post('/regions/add', [RegionController::class, 'add']);
+
+    $router->get('/villes', [VilleController::class, 'list']);
+    $router->get('/villes/add', [VilleController::class, 'add']);
+    $router->post('/villes/add', [VilleController::class, 'add']);
+
+    $router->get('/besoins', [BesoinController::class, 'list']);
+    $router->get('/besoins/add', [BesoinController::class, 'add']);
+    $router->post('/besoins/add', [BesoinController::class, 'add']);
+
+    $router->get('/dons', [DonController::class, 'list']);
+    $router->get('/dons/add', [DonController::class, 'add']);
+    $router->post('/dons/add', [DonController::class, 'add']);
+
+    // Dashboard - l'objectif principal
+    $router->get('/dashboard', [DashboardController::class, 'index']);
 
 });
