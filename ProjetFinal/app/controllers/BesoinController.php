@@ -1,17 +1,19 @@
 <?php
 namespace app\controllers;
+
 use app\models\Besoin;
-use Flight;
 
 class BesoinController {
+    
     public function list() {
-        $besoins = Besoin::getAllBesoins();
+        $besoinModel = new Besoin();
+        $besoins = $besoinModel->getAllBesoins();
         Flight::render('besoin/list.php', ['besoins' => $besoins]);
     }
 
     public function listBesoin() {
-        $besoins = Besoin::getAllBesoins();
-        return $besoins;  // Retourner les données
+        $besoinModel = new Besoin();
+        return $besoinModel->getAllBesoins();
     }
 
     public function add() {
@@ -27,6 +29,7 @@ class BesoinController {
                 $besoinModel = new Besoin();
                 $besoinModel->addBesoin($description, (int)$idProduit, (int)$idVille, $idRegion ? (int)$idRegion : null, (int)$quantite, $dateBesoin);
 
+                $_SESSION['success'] = 'Besoin created successfully';
                 header('Location: ' . Flight::get('flight.base_url') . '/besoins');
                 exit();
             } else {
