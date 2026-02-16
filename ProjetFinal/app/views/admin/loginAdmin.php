@@ -52,7 +52,7 @@
                         <div class="red-block-outline" style="width: 70px; height: 70px; bottom: 160px; right: 140px;"></div>
                     </div>
                     <div class="hero-content">
-                        <h1>Welcome to Takalo-Takalo</h1>
+                        <h1>Bienvenue à BNGRC</h1>
                         <p>
                             <span class="text-option">Experience culinary excellence in an atmosphere of refined sophistication</span>
                             <span class="text-option">Discover exquisite flavors crafted with passion and precision</span>

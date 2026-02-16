@@ -26,7 +26,7 @@ class UserController {
         Flight::render('modele.php', [
             'contentPage' => '/admin/loginAdmin',
             'currentPage' => '/admin/loginAdmin',
-            'pageTitle' => 'Login Admin - Takalo-Takalo'
+            'pageTitle' => 'Login Admin - BNGRC'
         ]);
     }
 
@@ -73,7 +73,7 @@ class UserController {
         Flight::render('modele.php', [
             'contentPage' => 'utilisateur/loginUser',
             'currentPage' => 'utilisateur/loginUser',
-            'pageTitle' => 'Login User - Takalo-Takalo'
+            'pageTitle' => 'Login User - BNGRC'
         ]);
     }
 
@@ -120,7 +120,7 @@ class UserController {
         Flight::render('modele.php', [
             'contentPage' => 'utilisateur/registerForm',
             'currentPage' => 'utilisateur/registerForm',
-            'pageTitle' => 'Register - Takalo-Takalo'
+            'pageTitle' => 'Register - BNGRC'
         ]);
     }
 

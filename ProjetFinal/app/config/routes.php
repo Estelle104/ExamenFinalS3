@@ -1,3 +1,4 @@
+
 <?php
 
 use app\controllers\UserController;
@@ -7,6 +8,8 @@ use app\controllers\BesoinController;
 use app\controllers\DonController;
 use app\controllers\DashboardController;
 use app\controllers\AchatController;
+use app\controllers\ConfFraisAchatController;
+use app\controllers\RecapitulatifController;
 use flight\net\Router;
 use flight\Engine;
 
@@ -51,7 +54,7 @@ $router->group('', function(Router $router) use ($app) {
         Flight::render('modele.php', [
             'contentPage' => 'accueil',
             'currentPage' => 'accueil',
-            'pageTitle' => 'Home - Takalo-Takalo'
+            'pageTitle' => 'Home - BNGRC'
         ]);
     });
    
@@ -78,9 +81,20 @@ $router->group('', function(Router $router) use ($app) {
     // Route de simulation - exécute l'allocation des dons aux besoins
     $router->get('/simulate', [DashboardController::class, 'simulate']);
 
+    // Page de récapitulatif AJAX
+    $router->get('/recapitulatif', [RecapitulatifController::class, 'index']);
+    $router->get('/recapitulatif/ajax', [RecapitulatifController::class, 'ajax']);
+
+
     $router->get('/achat/add', [AchatController::class, 'addAchat']);
     $router->post('/achat/add', [AchatController::class, 'addAchat']);
     $router->get('/achat/list', [AchatController::class, 'listAchats']);
+    $router->get('/achat/frais', [ConfFraisAchatController::class, 'edit']);
+    $router->post('/achat/frais', [ConfFraisAchatController::class, 'edit']);
+    // Route AJAX pour feedback interactif
+    $router->get('/achat/recap', [AchatController::class, 'recapAchatAjax']);
+    // Route AJAX pour filtrer les produits par ville
+    $router->get('/achat/produits', [AchatController::class, 'produitsParVilleAjax']);
 
 
 });

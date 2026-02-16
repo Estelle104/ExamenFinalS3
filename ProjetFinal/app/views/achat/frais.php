@@ -1,22 +1,7 @@
-<?php
-
-use app\models\Region;
-
-$regionModel = new Region();
-$regions = $regionModel->getAllRegions();
-?>
-
 <section id="reservation">
     <div class="reservation">
         <div class="reservation-left">
-            <h2>Ajouter une Région</h2>
-            
-            <?php if (isset($_SESSION['error'])): ?>
-                <div class="alert alert-danger" style="margin-bottom: 20px;">
-                    <?= htmlspecialchars($_SESSION['error']) ?>
-                    <?php unset($_SESSION['error']); ?>
-                </div>
-            <?php endif; ?>
+            <h2>Configurer les frais d'achat</h2>
 
             <?php if (isset($_SESSION['success'])): ?>
                 <div class="alert alert-success" style="margin-bottom: 20px;">
@@ -25,14 +10,13 @@ $regions = $regionModel->getAllRegions();
                 </div>
             <?php endif; ?>
 
-            <form class="loginAdmin-form" action="<?php echo Flight::get('flight.base_url'); ?>/regions/add" method="POST">
+            <form class="loginAdmin-form" action="<?php echo Flight::get('flight.base_url'); ?>/achat/frais" method="POST">
                 <div class="form-group">
-                    <label for="nom">Nom de la région</label>
-                    <input type="text" id="nom" name="nom" required placeholder="Ex: Atsinanana">
+                    <label for="taux_pourcentage">Taux de frais (%)</label>
+                    <input type="number" step="0.01" id="taux_pourcentage" name="taux_pourcentage" required value="<?php echo htmlspecialchars((string)($tauxActuel ?? 0)); ?>">
                 </div>
 
-                <button type="submit" class="submit-btn-loginAdmin">Ajouter</button>
-                <a href="<?php echo Flight::get('flight.base_url'); ?>/regions" style="text-align: center; display: block; margin-top: 1rem; text-decoration: none; color: #666;">Retour</a>
+                <button type="submit" class="submit-btn-loginAdmin">Enregistrer</button>
             </form>
         </div>
         <div class="reservation-right">
@@ -66,15 +50,10 @@ $regions = $regionModel->getAllRegions();
         border-radius: 5px;
         margin-bottom: 1rem;
     }
-    .alert-danger {
-        background: #fee2e2;
-        color: #991b1b;
-        border: 1px solid #fecaca;
-    }
     .alert-success {
-        background: #dcfce7;
-        color: #166534;
-        border: 1px solid #bbf7d0;
+        background: #d4edda;
+        color: #155724;
+        border: 1px solid #c3e6cb;
     }
     .form-group {
         margin-bottom: 1.5rem;
@@ -83,78 +62,19 @@ $regions = $regionModel->getAllRegions();
         display: block;
         margin-bottom: 0.5rem;
         font-weight: 600;
-        color: #1e3a8a;
+        color: #333;
     }
-    .form-group input,
-    .form-group select {
+    .form-group input {
         width: 100%;
         padding: 0.75rem;
         border: 1px solid #ddd;
         border-radius: 5px;
         font-size: 1rem;
         font-family: inherit;
-        transition: all 0.3s ease;
     }
-    .form-group input:focus,
-    .form-group select:focus {
+    .form-group input:focus {
         outline: none;
-        border-color: #fbbf24;
-        box-shadow: 0 0 0 3px rgba(251, 191, 36, 0.15);
-    }
-    .form-group input:hover,
-    .form-group select:hover {
-        border-color: #1e3a8a;
-    }
-    /* Feedback interactif */
-    #achat-feedback {
-        font-size: 1rem;
-        background: #f8fafc;
-        border: 1px solid #e2e8f0;
-        border-radius: 5px;
-        padding: 0.75rem 1rem;
-        min-height: 30px;
-        color: #1e3a8a;
-        border-left: 4px solid #fbbf24;
-    }
-    
-    /* Style supplémentaire pour cohérence */
-    .form-group.required label::after {
-        content: " *";
-        color: #f59e0b;
-        font-weight: bold;
-    }
-    
-    .btn-submit {
-        background: #1e3a8a;
-        color: white;
-        padding: 0.75rem 1.5rem;
-        border: none;
-        border-radius: 5px;
-        font-size: 1rem;
-        font-weight: 600;
-        cursor: pointer;
-        transition: all 0.3s ease;
-    }
-    
-    .btn-submit:hover {
-        background: #2d4ec0;
-        transform: translateY(-2px);
-        box-shadow: 0 4px 12px rgba(30, 58, 138, 0.2);
-    }
-    
-    .btn-submit:active {
-        transform: translateY(0);
-    }
-    
-    .hint-text {
-        font-size: 0.875rem;
-        color: #64748b;
-        margin-top: 0.25rem;
-        display: block;
-    }
-    
-    .hint-text i {
-        color: #f59e0b;
-        margin-right: 0.25rem;
+        border-color: #e74c3c;
+        box-shadow: 0 0 0 3px rgba(231, 76, 60, 0.1);
     }
 </style>

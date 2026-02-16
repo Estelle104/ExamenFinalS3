@@ -121,7 +121,10 @@ class DashboardController {
             return $aDate < $bDate ? -1 : 1;
         });
 
-        Flight::render('dashboard/index.php', [
+        Flight::render('modele.php', [
+            'contentPage' => 'dashboard/index',
+            'currentPage' => 'dashboard',
+            'pageTitle' => 'Dashboard - BNGRC',
             'dashboard' => $dashboard,
             'totalVilles' => count($villes),
             'totalBesoins' => count($allBesoins),

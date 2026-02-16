@@ -29,12 +29,13 @@
             <div class="red-block-outline" style="width: 70px; height: 70px; bottom: 160px; right: 140px;"></div>
         </div>
         <div class="hero-content">
-            <h1>Welcome to Takalo-Takalo</h1>
+            <h1>BNGRC </h1>
+            <h1>Bureau National de Gestion des Risques et des Catastrophes</h1>
             <p>
-                <span class="text-option">Experience culinary excellence in an atmosphere of refined sophistication</span>
-                <span class="text-option">Discover exquisite flavors crafted with passion and precision</span>
-                <span class="text-option">Where fine dining meets unforgettable moments</span>
+                <span class="text-option">Bureau s'engageant pour la protection des citoyens</span>
+                <span class="text-option">Specifie pour la gestion des risques et des catastrophes</span>
+                <span class="text-option">Agit comme un point de contact central pour la gestion des risques</span>
             </p>
-            <a href="#reservation" class="cta-btn">Reserve Your Table</a>
+            <a href="#reservation" class="cta-btn">En savoir plus</a>
         </div>
     </section>

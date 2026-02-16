@@ -49,9 +49,10 @@ $app->set('flight.views.path', __DIR__ . $ds . '..' . $ds . 'views'); // Path to
 $app->set('flight.views.extension', '.php');  // View file extension (e.g., '.php', '.latte')
 $app->set('flight.content_length', false);    // Send content length header. Usually false unless required by proxy
 
-// Generate a CSP nonce for each request and store in $app
-$nonce = bin2hex(random_bytes(16));
-$app->set('csp_nonce', $nonce);
+// CSP nonce (déjà généré dans bootstrap.php)
+if (!$app->get('csp_nonce')) {
+	$app->set('csp_nonce', bin2hex(random_bytes(16)));
+}
 
 return [
 	'database' => [

@@ -1,20 +1,23 @@
 <?php
 // Variables dynamiques pour connecter le modèle aux autres pages
-$pageTitle = isset($pageTitle) ? $pageTitle : 'Takalo-Takalo - Fine Dining Experience';
+$pageTitle = isset($pageTitle) ? $pageTitle : 'BNGRC - Bureau de Gestion des Ressources Communes';
 $currentPage = isset($currentPage) ? $currentPage : 'home';
 $baseUrl = isset($baseUrl) ? $baseUrl : Flight::get('flight.base_url');
 $navItems = isset($navItems) ? $navItems : [
-    ['label' => 'Home', 'url' => '#home', 'id' => 'home'],
-    ['label' => 'Menu', 'url' => '#menu', 'id' => 'menu'],
-    ['label' => 'Reservations', 'url' => '#reservation', 'id' => 'reservation'],
-    ['label' => 'Contact', 'url' => '#contact', 'id' => 'contact']
+    ['label' => 'Accueil', 'url' => $baseUrl . '/accueil', 'id' => 'accueil'],
+    ['label' => 'Dashboard', 'url' => $baseUrl . '/dashboard', 'id' => 'dashboard'],
+    ['label' => 'Besoins', 'url' => $baseUrl . '/besoins', 'id' => 'besoins'],
+    ['label' => 'Dons', 'url' => $baseUrl . '/dons', 'id' => 'dons'],
+    ['label' => 'Achats', 'url' => $baseUrl . '/achat/list', 'id' => 'achat'],
+    ['label' => 'Récapitulatif', 'url' => $baseUrl . '/recapitulatif', 'id' => 'recapitulatif'],
+    ['label' => 'Frais', 'url' => $baseUrl . '/achat/frais', 'id' => 'frais']
 ];
 
 $nonce = Flight::app()->get('csp_nonce');
 
 // Données du restaurant
 $restaurantInfo = isset($restaurantInfo) ? $restaurantInfo : [
-    'name' => 'Takalo-Takalo',
+    'name' => 'BNGRC',
     'address' => '123 Culinary Street',
     'district' => 'Gourmet District, GD 12345',
     'phone' => '(555) 123-4567',
@@ -91,7 +94,7 @@ $contentPath = __DIR__ . '/' . $contentPage . '.php';
     </style>
 <!--
 
-Tooplate 2148 Takalo-Takalo
+BNGRC - Bureau de Gestion des Ressources Communes
 
 https://www.tooplate.com/view/2148-bistro-elegance
 
@@ -104,25 +107,36 @@ Free HTML CSS Template
     <nav>
         <div class="nav-container">
             <a href="<?php echo htmlspecialchars($baseUrl); ?>" class="logo">
-                <svg width="40" height="40" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <!-- Plate/Circle -->
-                    <circle cx="20" cy="20" r="18" stroke="#e74c3c" stroke-width="2" fill="none"/>
-                    <circle cx="20" cy="20" r="14" stroke="#e74c3c" stroke-width="1" fill="none" opacity="0.5"/>
-                    
-                    <!-- Fork -->
-                    <path d="M10 12 L10 20 M8 12 L8 15 M12 12 L12 15 M8 12 L12 12" stroke="#333" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-                    
-                    <!-- Knife -->
-                    <path d="M30 12 L30 20 M28 12 Q28 14 30 14" stroke="#333" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
-                    
-                    <!-- Chef's hat accent -->
-                    <ellipse cx="20" cy="26" rx="6" ry="3" fill="#e74c3c" opacity="0.2"/>
-                    <path d="M14 26 C14 24 16 22 20 22 C24 22 26 24 26 26" stroke="#e74c3c" stroke-width="1.5" stroke-linecap="round" fill="none"/>
-                    <circle cx="17" cy="24" r="1" fill="#e74c3c" opacity="0.6"/>
-                    <circle cx="20" cy="23" r="1" fill="#e74c3c" opacity="0.6"/>
-                    <circle cx="23" cy="24" r="1" fill="#e74c3c" opacity="0.6"/>
-                </svg>
-                <span><?php echo htmlspecialchars($restaurantInfo['name']); ?></span>
+            <svg width="45" height="45" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <!-- Cercle de fond bleu (couleur principale BNGRC) -->
+    <circle cx="50" cy="50" r="48" fill="#1e3a8a" stroke="none"/>
+    
+    <!-- Anneau extérieur blanc pour contraste -->
+    <circle cx="50" cy="50" r="45" fill="none" stroke="#ffffff" stroke-width="2" opacity="0.8"/>
+    
+    <!-- Éléments de protection/sécurité (bouclier stylisé) -->
+    <path d="M50 15 L75 30 L75 55 Q50 80 25 55 L25 30 L50 15" fill="#fbbf24" opacity="0.95" stroke="#ffffff" stroke-width="1.5"/>
+    
+    <!-- Silhouette de Madagascar (blanche) -->
+    <path d="M50 35 L58 40 L60 48 L55 55 L60 63 L55 70 L50 73 L45 70 L40 63 L45 55 L40 48 L42 40 L50 35" fill="#ffffff" opacity="0.9"/>
+    
+    <!-- Éléments de gestion/ressources (engrenages stylisés) -->
+    <g fill="#f59e0b" opacity="0.9">
+        <!-- Petit engrenage droite -->
+        <circle cx="70" cy="40" r="8" fill="#f59e0b"/>
+        <circle cx="70" cy="40" r="5" fill="#1e3a8a"/>
+        <!-- Petit engrenage gauche -->
+        <circle cx="30" cy="60" r="8" fill="#f59e0b"/>
+        <circle cx="30" cy="60" r="5" fill="#1e3a8a"/>
+    </g>
+    
+    <!-- Lignes de connexion (réseau/coordination) -->
+    <path d="M40 45 L50 38 L60 45 M35 55 L45 62 L55 55" stroke="#ffffff" stroke-width="2" opacity="0.7" stroke-dasharray="3 2"/>
+    
+    <!-- Initiales BNGRC minimales -->
+    <text x="50" y="88" text-anchor="middle" fill="#ffffff" font-size="9" font-weight="bold" font-family="Arial, sans-serif">BNGRC</text>
+</svg>    
+            <span><?php echo htmlspecialchars($restaurantInfo['name']); ?></span>
             </a>
             <ul class="nav-links">
                 <?php foreach($navItems as $item): ?>
@@ -159,6 +173,7 @@ Free HTML CSS Template
 
     <!-- Footer -->
     <footer id="contact">
+        <h1>ETU004219 - ETU004185 - ETU003947</h1>
         <div class="footer-content">
             <div class="footer-section">
                 <h3>Contact Us</h3>

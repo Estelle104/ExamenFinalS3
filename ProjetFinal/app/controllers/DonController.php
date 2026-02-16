@@ -10,7 +10,12 @@ class DonController {
     public function list() {
         $donModel = new Don();
         $dons = $donModel->getAllDons();
-        Flight::render('don/list.php', ['dons' => $dons]);
+        Flight::render('modele.php', [
+            'contentPage' => 'don/list',
+            'currentPage' => 'don',
+            'pageTitle' => 'Liste des dons - Takalo-Takalo',
+            'dons' => $dons
+        ]);
     }
 
     public function add() {
@@ -36,6 +41,10 @@ class DonController {
             }
         }
 
-        Flight::render('don/add.php');
+        Flight::render('modele.php', [
+            'contentPage' => 'don/add',
+            'currentPage' => 'don',
+            'pageTitle' => 'Ajouter un don - Takalo-Takalo'
+        ]);
     }
 }

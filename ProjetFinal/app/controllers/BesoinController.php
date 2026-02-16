@@ -10,7 +10,12 @@ class BesoinController {
     public function list() {
         $besoinModel = new Besoin();
         $besoins = $besoinModel->getAllBesoins();
-        Flight::render('besoin/list.php', ['besoins' => $besoins]);
+        Flight::render('modele.php', [
+            'contentPage' => 'besoin/list',
+            'currentPage' => 'besoin',
+            'pageTitle' => 'Liste des besoins - Takalo-Takalo',
+            'besoins' => $besoins
+        ]);
     }
 
     public function listBesoin() {
@@ -40,7 +45,11 @@ class BesoinController {
             }
         }
 
-        Flight::render('besoin/add.php');
+        Flight::render('modele.php', [
+            'contentPage' => 'besoin/add',
+            'currentPage' => 'besoin',
+            'pageTitle' => 'Ajouter un besoin - Takalo-Takalo'
+        ]);
     }
 }
 
