@@ -48,7 +48,7 @@
                                     <td class="ville-name"><?php echo htmlspecialchars($item['ville']['nom']); ?></td>
                                     <td><?php echo $item['totalBesoins']; ?></td>
                                     <td><?php echo $item['totalBesoinsQuantite']; ?> unités</td>
-                                    <td><?php echo $item['totalAllouee']; ?> unités</td>
+                                    <td><?php echo $item['quantiteAllouee']; ?> unités</td>
                                     <td>
                                         <div class="progress-bar">
                                             <div class="progress-fill" style="width: <?php echo min($item['pourcentage'], 100); ?>%"></div>
