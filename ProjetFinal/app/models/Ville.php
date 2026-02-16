@@ -7,14 +7,14 @@ class Ville extends Db
 {
     private $table = 'villes';
 
-    public static function addVille(string $nom, int $idRegion): int
+    public function addVille(string $nom, int $idRegion): int
     {
         $sql = "INSERT INTO {$this->table} (nom, id_region) VALUES (?, ?)";
         $this->execute($sql, [$nom, $idRegion]);
         return (int) $this->db->lastInsertId();
     }
 
-    public static function getAllVilles(): array
+    public function getAllVilles(): array
     {
         $sql = "SELECT v.*, r.nom AS region_nom
                 FROM {$this->table} v
