@@ -54,7 +54,7 @@ class UserController {
             // Authentification réussie
             $_SESSION['user'] = $user;
             $_SESSION['user_type'] = 'admin';
-            header('Location: ' . Flight::get('flight.base_url') . '/gestionCategory');
+            header('Location: ' . Flight::get('flight.base_url') . '/accueil');
             exit();
         } else {
             // Authentification échouée

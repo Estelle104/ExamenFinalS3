@@ -11,15 +11,16 @@ class Don extends Db
     public function addDon(
         string $description,
         int $idProduit,
-        int $idVille,
+        ?int $idVille,
         int $quantite,
         ?string $dateDon,
-        string $donneur
+        string $donneur,
+        ?int $idRegion = null
     ): int {
         $dateDon = $dateDon ?: date('Y-m-d');
-        $sql = "INSERT INTO {$this->table} (description, id_produit, id_ville, quantite, date_don, donneur)
-                VALUES (?, ?, ?, ?, ?, ?)";
-        $this->execute($sql, [$description, $idProduit, $idVille, $quantite, $dateDon, $donneur]);
+        $sql = "INSERT INTO {$this->table} (description, id_produit, id_ville, id_region, quantite, date_don, donneur)
+                VALUES (?, ?, ?, ?, ?, ?, ?)";
+        $this->execute($sql, [$description, $idProduit, $idVille, $idRegion, $quantite, $dateDon, $donneur]);
         return (int) $this->db->lastInsertId();
     }
 
@@ -29,7 +30,7 @@ class Don extends Db
                 FROM {$this->table} d
                 LEFT JOIN produits p ON p.id = d.id_produit
                 LEFT JOIN villes v ON v.id = d.id_ville
-                ORDER BY d.date_don DESC, d.id DESC";
+                ORDER BY d.date_don ASC, d.id DESC";
         return $this->execute($sql)->fetchAll(PDO::FETCH_ASSOC);
     }
 

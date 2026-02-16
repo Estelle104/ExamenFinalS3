@@ -11,4 +11,10 @@ class Categorie extends Db
         $this->execute($sql, [$libelle, $description]);
         return (int) $this->db->lastInsertId();
     }
+
+    public function getAllCategories(): array
+    {
+        $sql = "SELECT * FROM {$this->table} ORDER BY libelle ASC";
+        return $this->execute($sql)->fetchAll(\PDO::FETCH_ASSOC);
+    }
 }

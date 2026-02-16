@@ -11,7 +11,7 @@ class Besoin extends Db
     public function addBesoin(
         string $description,
         int $idProduit,
-        int $idVille,
+        ?int $idVille,
         ?int $idRegion,
         int $quantite,
         ?string $dateBesoin = null
@@ -58,5 +58,11 @@ class Besoin extends Db
         }
 
         return (float) $row['montant'];
+    }
+
+    public function getAllBesoins(): array
+    {
+        $sql = "SELECT * FROM {$this->table} ORDER BY date_besoin ASC";
+        return $this->execute($sql)->fetchAll(PDO::FETCH_ASSOC);
     }
 }
