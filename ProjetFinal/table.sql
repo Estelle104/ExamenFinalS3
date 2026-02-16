@@ -64,6 +64,8 @@ CREATE  TABLE besoins(
     id_ville INT,
     id_region INT,
     quantite INT NOT NULL,
+    quantite_restante INT NOT NULL DEFAULT 0,
+    etat VARCHAR(50) DEFAULT 'En attente',
     date_besoin DATE
 );
 
