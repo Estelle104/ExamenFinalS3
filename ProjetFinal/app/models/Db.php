@@ -4,7 +4,7 @@ namespace app\models;
 use PDO;
 use PDOException;
 
-class Model
+class Db
 {
     protected $db;
 
