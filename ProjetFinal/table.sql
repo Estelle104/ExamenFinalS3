@@ -33,31 +33,31 @@ INSERT INTO users (nom, login, mdp, id_type_user) VALUES
 ('Paul Andry', 'paul', 'paul123', 2);
 
 
-CREATE OR REPLACE TABLE regions(
+CREATE  TABLE regions(
     id INT PRIMARY KEY AUTO_INCREMENT,
     nom VARCHAR(40) NOT NULL
 );
 
-CREATE OR REPLACE TABLE villes(
+CREATE  TABLE villes(
     id INT PRIMARY KEY AUTO_INCREMENT,
     nom VARCHAR(40) NOT NULL,
     id_region INT
 );
 
-CREATE OR REPLACE TABLE categorie_produits(
+CREATE  TABLE categorie_produits(
     id INT PRIMARY KEY AUTO_INCREMENT,
     libelle VARCHAR(40) NOT NULL,
     description VARCHAR(255) NOT NULL
 );
 
-CREATE OR REPLACE TABLE produits(
+CREATE  TABLE produits(
     id INT PRIMARY KEY AUTO_INCREMENT,
     nom VARCHAR(40) NOT NULL,
     id_categorie INT,
     prix_unitaire DECIMAL(10,2)
 );
 
-CREATE OR REPLACE TABLE besoins(
+CREATE  TABLE besoins(
     id INT PRIMARY KEY AUTO_INCREMENT,
     description VARCHAR(255) NOT NULL,
     id_produit INT,
@@ -68,7 +68,7 @@ CREATE OR REPLACE TABLE besoins(
 );
 
 
-CREATE OR REPLACE TABLE dons(
+CREATE  TABLE dons(
     id INT PRIMARY KEY AUTO_INCREMENT,
     description VARCHAR(255) NOT NULL,
     id_produit INT,
