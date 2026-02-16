@@ -67,7 +67,12 @@ class Don extends Db
 
                 $summary['dons_traite']++;
 
-                $besoins = $this->getBesoinsCompatibles((int) $don['id_produit']);
+                // Passer la ville ET région du don pour filtrage correct
+                $besoins = $this->getBesoinsCompatibles(
+                    (int) $don['id_produit'],
+                    $don['id_ville'] ? (int) $don['id_ville'] : null,
+                    $don['id_region'] ? (int) $don['id_region'] : null
+                );
                 foreach ($besoins as $besoin) {
                     if ($remainingDon <= 0) {
                         break;
@@ -164,26 +169,25 @@ class Don extends Db
         return $row ?: ['total_besoins' => 0, 'total_dons' => 0];
     }
 
-    /**
-     * Calcule le total global des dons attribués (dispatch).
-     * @return int Total attribué.
-     */
-    public function getTotalAttribue(): int
-    {
-        $sql = "SELECT COALESCE(SUM(quantite_attribuee), 0) AS total_attribue
-                FROM dispatch";
-        $row = $this->execute($sql)->fetch(PDO::FETCH_ASSOC);
-        return (int) ($row['total_attribue'] ?? 0);
-    }
-
-    /**
-     * Récupère les besoins compatibles pour un produit donné.
-     * @return array Liste des besoins compatibles.
-     */
     private function getBesoinsCompatibles(int $idProduit): array
     {
-        $sql = "SELECT * FROM besoins WHERE id_produit = ? ORDER BY date_besoin ASC, id ASC";
-        return $this->execute($sql, [$idProduit])->fetchAll(PDO::FETCH_ASSOC);
+        // Filtrer par produit ET par localisation (ville ou région)
+        $sql = "SELECT * FROM besoins WHERE id_produit = ? ";
+        $params = [$idProduit];
+        
+        // Si don a une ville → chercher besoins de la même ville
+        if ($idVille !== null) {
+            $sql .= "AND id_ville = ? ";
+            $params[] = $idVille;
+        }
+        // Sinon si don a une région → chercher besoins de la même région (sans ville)
+        elseif ($idRegion !== null) {
+            $sql .= "AND id_region = ? AND id_ville IS NULL ";
+            $params[] = $idRegion;
+        }
+        
+        $sql .= "ORDER BY date_besoin ASC, id ASC";
+        return $this->execute($sql, $params)->fetchAll(PDO::FETCH_ASSOC);
     }
 
     /**
@@ -212,4 +216,22 @@ class Don extends Db
         return (int) ($row['total'] ?? 0);
     }
 
+    private function updateEtatBesoin(int $idBesoin, int $quantiteTotale, int $restant): int
+    {
+        $etat = 'En attente';
+        if ($restant <= 0) {
+            $etat = 'Satisfait';
+        } elseif ($restant < $quantiteTotale) {
+            $etat = 'Partiel';
+        }
+
+        try {
+            // Mettre à jour l'état ET la quantité_restante (préserve quantité originale)
+            $sql = "UPDATE besoins SET etat = ?, quantite_restante = ? WHERE id = ?";
+            $this->execute($sql, [$etat, max(0, $restant), $idBesoin]);
+            return 1;
+        } catch (PDOException $e) {
+            return 0;
+        }
+    }
 }

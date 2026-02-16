@@ -19,9 +19,6 @@ class DashboardController {
         $allBesoins = $besoinModel->getAllBesoins();
         $allDons = $donModel->getAllDons();
         
-        // Récupérer les allocations depuis dispatch
-        $dispatches = $this->getDispatches();
-        
         // Préparer les données pour le tableau
         $dashboard = [];
         
@@ -29,29 +26,28 @@ class DashboardController {
             // Filtrer les besoins de cette ville
             $besoinsVille = array_filter($allBesoins, fn($b) => $b['id_ville'] == $ville['id']);
             
-            // Calculer les allocations reçues pour cette ville par dispatch
-            $quantiteAllouee = 0;
-            foreach ($dispatches as $dispatch) {
-                // Trouver le besoin correspondant
-                foreach ($besoinsVille as $besoin) {
-                    if ($besoin['id'] == $dispatch['id_besoin']) {
-                        $quantiteAllouee += $dispatch['quantite_attribuee'];
-                        break;
-                    }
-                }
+            // Calculer la quantité restante pour cette ville
+            // quantite_restante = total des quantités restantes de tous les besoins
+            $quantiteRestante = 0;
+            foreach ($besoinsVille as $besoin) {
+                // Utiliser quantite_restante si disponible, sinon quantite (pour compatibilité)
+                $quantiteRestante += ($besoin['quantite_restante'] ?? $besoin['quantite']);
             }
             
-            // Calculer le total des besoins par ville
+            // Calculer le total des besoins (quantité originale)
             $totalBesoinsQuantite = 0;
             foreach ($besoinsVille as $besoin) {
                 $totalBesoinsQuantite += $besoin['quantite'];
             }
             
-            // Déterminer l'état basé sur les allocations
+            // Quantité allouée = originale - restante
+            $quantiteAllouee = $totalBesoinsQuantite - $quantiteRestante;
+            
+            // Déterminer l'état basé sur quantite_restante
             if (count($besoinsVille) == 0) {
                 $etat = 'N/A';
                 $pourcentage = 0;
-            } elseif ($quantiteAllouee >= $totalBesoinsQuantite) {
+            } elseif ($quantiteRestante <= 0) {
                 $etat = '✅ Satisfait';
                 $pourcentage = 100;
             } elseif ($quantiteAllouee > 0) {
@@ -67,7 +63,8 @@ class DashboardController {
                 'besoins' => $besoinsVille,
                 'totalBesoins' => count($besoinsVille),
                 'totalBesoinsQuantite' => $totalBesoinsQuantite,
-                'totalAllouee' => $quantiteAllouee,
+                'quantiteAllouee' => $quantiteAllouee,
+                'quantiteRestante' => $quantiteRestante,
                 'etat' => $etat,
                 'pourcentage' => $pourcentage
             ];
