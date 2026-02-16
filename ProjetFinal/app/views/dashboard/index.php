@@ -32,23 +32,64 @@
             <!-- Main Table -->
             <div class="table-wrapper">
                 <?php if (!empty($dashboard)): ?>
+                    <?php
+                        $sumBesoins = 0;
+                        $sumQuantite = 0;
+                        $sumAllouee = 0;
+                        $sumRestante = 0;
+                    ?>
                     <table class="dashboard-table">
                         <thead>
                             <tr>
                                 <th>Ville</th>
+                                <th>Produits demandés</th>
                                 <th>Besoins</th>
                                 <th>Quantité nécessaire</th>
                                 <th>Quantité allouée</th>
+                                <th>Quantité restante</th>
+                                <th>État</th>
                                 <th>Progression</th>
                             </tr>
                         </thead>
                         <tbody>
                             <?php foreach ($dashboard as $item): ?>
+                                <?php
+                                    $sumBesoins += $item['totalBesoins'];
+                                    $sumQuantite += $item['totalBesoinsQuantite'];
+                                    $sumAllouee += $item['quantiteAllouee'];
+                                    $sumRestante += $item['quantiteRestante'];
+                                ?>
                                 <tr>
                                     <td class="ville-name"><?php echo htmlspecialchars($item['ville']['nom']); ?></td>
+                                    <td>
+                                        <?php if (!empty($item['produits'])): ?>
+                                            <div class="product-chips">
+                                                <?php foreach ($item['produits'] as $produitNom): ?>
+                                                    <span class="chip"><?php echo htmlspecialchars($produitNom); ?></span>
+                                                <?php endforeach; ?>
+                                            </div>
+                                        <?php else: ?>
+                                            <span class="muted">Aucun</span>
+                                        <?php endif; ?>
+                                    </td>
                                     <td><?php echo $item['totalBesoins']; ?></td>
                                     <td><?php echo $item['totalBesoinsQuantite']; ?> unités</td>
-                                    <td><?php echo $item['quantiteAllouee']; ?> unités</td>
+                                    <td>
+                                        <?php echo $item['quantiteAllouee']; ?> unités
+                                        <small><?php echo $item['quantiteAllouee']; ?>/<?php echo $item['totalBesoinsQuantite']; ?></small>
+                                    </td>
+                                    <td><?php echo $item['quantiteRestante']; ?> unités</td>
+                                    <td>
+                                        <?php if ($item['etat'] === '✅ Satisfait'): ?>
+                                            <span class="badge badge-satisfait">Satisfait</span>
+                                        <?php elseif ($item['etat'] === '⏳ Partiel'): ?>
+                                            <span class="badge badge-partiel">Partiel</span>
+                                        <?php elseif ($item['etat'] === '❌ En attente'): ?>
+                                            <span class="badge badge-attente">En attente</span>
+                                        <?php else: ?>
+                                            <span class="badge badge-na">N/A</span>
+                                        <?php endif; ?>
+                                    </td>
                                     <td>
                                         <div class="progress-bar">
                                             <div class="progress-fill" style="width: <?php echo min($item['pourcentage'], 100); ?>%"></div>
@@ -59,7 +100,39 @@
                                 </tr>
                             <?php endforeach; ?>
                         </tbody>
+                        <tfoot>
+                            <tr>
+                                <td class="ville-name">Total</td>
+                                <td><?php echo $sumBesoins; ?></td>
+                                <td><?php echo $sumQuantite; ?> unités</td>
+                                <td><?php echo $sumAllouee; ?> unités</td>
+                                <td><?php echo $sumRestante; ?> unités</td>
+                                <td>
+                                    <?php if ($sumQuantite <= 0): ?>
+                                        <span class="badge badge-na">N/A</span>
+                                    <?php elseif ($sumRestante <= 0): ?>
+                                        <span class="badge badge-satisfait">Satisfait</span>
+                                    <?php elseif ($sumAllouee > 0): ?>
+                                        <span class="badge badge-partiel">Partiel</span>
+                                    <?php else: ?>
+                                        <span class="badge badge-attente">En attente</span>
+                                    <?php endif; ?>
+                                </td>
+                                <td>
+                                    <?php
+                                        $totalPourcentage = $sumQuantite > 0
+                                            ? round(($sumAllouee / $sumQuantite) * 100, 2)
+                                            : 0;
+                                    ?>
+                                    <div class="progress-bar">
+                                        <div class="progress-fill" style="width: <?php echo min($totalPourcentage, 100); ?>%"></div>
+                                    </div>
+                                    <small><?php echo $totalPourcentage; ?>%</small>
+                                </td>
+                            </tr>
+                        </tfoot>
                     </table>
+                    <p class="table-note">État basé sur la quantité restante des besoins. La progression correspond au taux de couverture allouée.</p>
                 <?php else: ?>
                     <div class="no-data">
                         <p>Aucune donnée disponible pour le moment.</p>
@@ -76,29 +149,6 @@
             </div>
         </div>
 
-        <!-- Right Section: Decoration (Like LoginAdmin) -->
-        <div class="dashboard-right">
-            <section class="heroDashboard">
-                <div class="diagonal-grid">
-                    <div class="soft-block" style="width: 80px; bottom: -400px; left: -100px; animation-delay: 0s; animation-duration: 22s;"></div>
-                    <div class="soft-block" style="width: 60px; bottom: -300px; left: 100px; animation-delay: 2s; animation-duration: 20s;"></div>
-                    <div class="soft-block" style="width: 100px; bottom: -370px; left: 350px; animation-delay: 1s; animation-duration: 24s;"></div>
-                    <div class="soft-block" style="width: 70px; bottom: -230px; left: 200px; animation-delay: 1.5s; animation-duration: 21s;"></div>
-                    <div class="soft-block" style="width: 90px; bottom: -170px; left: 500px; animation-delay: 0.5s; animation-duration: 23s;"></div>
-                </div>
-                <div class="static-decoration">
-                    <div class="static-block-outline" style="width: 85px; height: 85px; top: 20px; right: 30px;"></div>
-                    <div class="static-block" style="width: 120px; height: 120px; top: 80px; right: 120px;"></div>
-                    <div class="static-block-outline" style="width: 100px; height: 100px; top: 140px; right: 50px;"></div>
-                    <div class="static-block" style="width: 95px; height: 95px; top: 200px; right: 150px;"></div>
-                </div>
-                <div class="bottom-right-decoration">
-                    <div class="red-block" style="width: 65px; height: 65px; bottom: 20px; right: 40px;"></div>
-                    <div class="red-block" style="width: 45px; height: 45px; bottom: 60px; right: 120px;"></div>
-                    <div class="red-block" style="width: 85px; height: 85px; bottom: 120px; right: 60px;"></div>
-                </div>
-            </section>
-        </div>
     </div>
 </section>
 
@@ -146,7 +196,7 @@ body {
 /* ===== LAYOUT PRINCIPAL ===== */
 .dashboard-container {
     display: grid;
-    grid-template-columns: 1.2fr 1fr;
+    grid-template-columns: 1fr;
     gap: 2rem;
     max-width: 1440px;
     margin: 2rem auto;
@@ -297,6 +347,69 @@ body {
     color: var(--primary);
 }
 
+.dashboard-table tfoot td {
+    background: var(--gray-50);
+    border-top: 2px solid var(--gray-200);
+    font-weight: 600;
+}
+
+.table-note {
+    margin: 0.75rem 0 0;
+    font-size: 0.85rem;
+    color: var(--gray-500);
+}
+
+.badge {
+    display: inline-block;
+    padding: 0.35rem 0.75rem;
+    border-radius: 999px;
+    font-size: 0.75rem;
+    font-weight: 700;
+}
+
+.badge-satisfait {
+    background: #d4edda;
+    color: #155724;
+}
+
+.badge-partiel {
+    background: #fff3cd;
+    color: #856404;
+}
+
+.badge-attente {
+    background: #f8d7da;
+    color: #721c24;
+}
+
+.badge-na {
+    background: #e2e8f0;
+    color: #4a5568;
+}
+
+.product-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.35rem;
+}
+
+.chip {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.2rem 0.6rem;
+    border-radius: 999px;
+    background: var(--gray-100);
+    color: var(--gray-700);
+    font-size: 0.75rem;
+    font-weight: 600;
+    border: 1px solid var(--gray-200);
+}
+
+.muted {
+    color: var(--gray-400);
+    font-size: 0.8rem;
+}
+
 /* ===== BARRE DE PROGRÈS ===== */
 .progress-bar {
     width: 100%;
@@ -325,9 +438,10 @@ td small {
 /* ===== BOUTONS D'ACTION ===== */
 .dashboard-actions {
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
+    grid-template-columns: repeat(auto-fit, minmax(200px, 240px));
     gap: 1rem;
     margin-top: 2rem;
+    justify-content: start;
 }
 
 .btn-dashboard {
