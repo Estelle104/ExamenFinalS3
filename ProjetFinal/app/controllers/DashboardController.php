@@ -4,6 +4,7 @@ namespace app\controllers;
 use app\models\Ville;
 use app\models\Besoin;
 use app\models\Don;
+use app\models\Produit;
 
 use Flight;
 
@@ -13,11 +14,17 @@ class DashboardController {
         $villeModel = new Ville();
         $besoinModel = new Besoin();
         $donModel = new Don();
+        $produitModel = new Produit();
         
         // Récupérer toutes les villes
         $villes = $villeModel->getAllVilles();
         $allBesoins = $besoinModel->getAllBesoins();
         $allDons = $donModel->getAllDons();
+        $allProduits = $produitModel->getAllProduits();
+        $produitsById = [];
+        foreach ($allProduits as $produit) {
+            $produitsById[$produit['id']] = $produit['nom'];
+        }
         
         // Préparer les données pour le tableau
         $dashboard = [];
@@ -33,6 +40,16 @@ class DashboardController {
                 // Utiliser quantite_restante si disponible, sinon quantite (pour compatibilité)
                 $quantiteRestante += ($besoin['quantite_restante'] ?? $besoin['quantite']);
             }
+
+            // Produits demandés par ville
+            $produitsVille = [];
+            foreach ($besoinsVille as $besoin) {
+                $idProduit = $besoin['id_produit'] ?? null;
+                if ($idProduit && isset($produitsById[$idProduit])) {
+                    $produitsVille[$produitsById[$idProduit]] = true;
+                }
+            }
+            $produitsVille = array_keys($produitsVille);
             
             // Calculer le total des besoins (quantité originale)
             $totalBesoinsQuantite = 0;
@@ -65,6 +82,7 @@ class DashboardController {
                 'totalBesoinsQuantite' => $totalBesoinsQuantite,
                 'quantiteAllouee' => $quantiteAllouee,
                 'quantiteRestante' => $quantiteRestante,
+                'produits' => $produitsVille,
                 'etat' => $etat,
                 'pourcentage' => $pourcentage
             ];

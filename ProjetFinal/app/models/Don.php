@@ -55,6 +55,10 @@ class Don extends Db
 
         $this->db->beginTransaction();
         try {
+            // Réinitialiser l'état des besoins et le dispatch pour une simulation propre
+            $this->execute("UPDATE besoins SET quantite_restante = quantite, etat = 'En attente'");
+            $this->execute("DELETE FROM dispatch");
+
             $dons = $this->execute(
                 "SELECT * FROM {$this->table} ORDER BY date_don ASC, id ASC"
             )->fetchAll(PDO::FETCH_ASSOC);
@@ -80,6 +84,7 @@ class Don extends Db
 
                     $remainingBesoin = $besoin['quantite'] - $this->getQuantiteAttribueePourBesoin((int) $besoin['id']);
                     if ($remainingBesoin <= 0) {
+                        $this->updateEtatBesoin((int) $besoin['id'], (int) $besoin['quantite'], 0);
                         continue;
                     }
 
@@ -97,6 +102,12 @@ class Don extends Db
 
                     $remainingDon -= $quantiteAttribuee;
                     $remainingBesoin -= $quantiteAttribuee;
+
+                    $this->updateEtatBesoin(
+                        (int) $besoin['id'],
+                        (int) $besoin['quantite'],
+                        (int) $remainingBesoin
+                    );
 
                 }
             }
@@ -169,7 +180,7 @@ class Don extends Db
         return $row ?: ['total_besoins' => 0, 'total_dons' => 0];
     }
 
-    private function getBesoinsCompatibles(int $idProduit): array
+    private function getBesoinsCompatibles(int $idProduit, ?int $idVille, ?int $idRegion): array
     {
         // Filtrer par produit ET par localisation (ville ou région)
         $sql = "SELECT * FROM besoins WHERE id_produit = ? ";

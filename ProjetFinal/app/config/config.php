@@ -31,7 +31,7 @@ $app->path(__DIR__ . $ds . '..' . $ds . '..');
 if (!defined('BASE_URL')) {
     define(
         'BASE_URL',
-        '/S3/mrRojo/EXAMENFINALS3/ExamenFinalS3/ProjetFinal'
+        '/ExamenFinalS3/ProjetFinal'
 
     );
 }

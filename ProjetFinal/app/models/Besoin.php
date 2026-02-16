@@ -21,13 +21,14 @@ class Besoin extends Db
     ): int {
         $dateBesoin = $dateBesoin ?: date('Y-m-d');
 
-        $sql = "INSERT INTO {$this->table} (description, id_produit, id_ville, id_region, quantite, date_besoin)
-                VALUES (?, ?, ?, ?, ?, ?)";
+        $sql = "INSERT INTO {$this->table} (description, id_produit, id_ville, id_region, quantite, quantite_restante, date_besoin)
+                VALUES (?, ?, ?, ?, ?, ?, ?)";
         $this->execute($sql, [
             $description,
             $idProduit,
             $idVille,
             $idRegion,
+            $quantite,
             $quantite,
             $dateBesoin
         ]);
