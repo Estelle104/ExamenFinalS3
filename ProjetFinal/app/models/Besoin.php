@@ -59,4 +59,14 @@ class Besoin extends Db
 
         return (float) $row['montant'];
     }
+
+    public static function getAllBesoins(): array
+    {
+        $sql = "SELECT b.*, p.nom AS produit_nom, v.nom AS ville_nom, r.nom AS region_nom
+                FROM {$this->table} b
+                LEFT JOIN produits p ON p.id = b.id_produit
+                LEFT JOIN villes v ON v.id = b.id_ville
+                LEFT JOIN regions r ON r.id = b.id_region
+                ORDER BY b.date_besoin DESC, b.id DESC";
+        return $this->execute($sql)->fetchAll(PDO::FETCH_ASSOC);
 }
