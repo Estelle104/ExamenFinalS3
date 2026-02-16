@@ -2,6 +2,7 @@
 namespace app\controllers;
 
 use app\models\Ville;
+use Flight;
 
 class VilleController {
     
