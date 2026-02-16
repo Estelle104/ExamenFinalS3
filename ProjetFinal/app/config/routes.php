@@ -6,6 +6,7 @@ use app\controllers\VilleController;
 use app\controllers\BesoinController;
 use app\controllers\DonController;
 use app\controllers\DashboardController;
+use app\controllers\AchatController;
 use flight\net\Router;
 use flight\Engine;
 
@@ -76,5 +77,10 @@ $router->group('', function(Router $router) use ($app) {
 
     // Route de simulation - exécute l'allocation des dons aux besoins
     $router->get('/simulate', [DashboardController::class, 'simulate']);
+
+    $router->get('/achat/add', [AchatController::class, 'addAchat']);
+    $router->post('/achat/add', [AchatController::class, 'addAchat']);
+    $router->get('/achat/list', [AchatController::class, 'listAchats']);
+
 
 });

@@ -3,6 +3,7 @@
 namespace app\controllers;
 
 use app\models\Achat;
+use app\models\Produit;
 use Flight;
 
 class AchatController
@@ -54,6 +55,7 @@ class AchatController
             ]);
         }
     }
+
     public function listAchats(){
 
         $achat = new Achat();
@@ -63,4 +65,6 @@ class AchatController
             'achats' => $achats
         ]);
     }
+
+
 }
