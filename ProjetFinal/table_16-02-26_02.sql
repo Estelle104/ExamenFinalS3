@@ -87,3 +87,13 @@ CREATE TABLE dispatch (
     id_besoin INT NOT NULL,
     quantite_attribuee INT NOT NULL
 );
+
+CREATE TABLE achats (
+ id INT AUTO_INCREMENT PRIMARY KEY,
+ id_produit INT,
+ id_ville INT,
+ quantite INT,
+ montant_total DECIMAL(10,2),
+ date_achat DATE
+);
+
