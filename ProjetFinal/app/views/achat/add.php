@@ -87,7 +87,7 @@ $produits = $produitController->getAllProduits();
                 </div>
 
                 <button type="submit" class="submit-btn-loginAdmin">Ajouter</button>
-                <a href="<?php echo Flight::get('flight.base_url'); ?>/achats" style="text-align: center; display: block; margin-top: 1rem; text-decoration: none; color: #666;">Retour</a>
+                <!-- <a href="<?php echo Flight::get('flight.base_url'); ?>/achats" style="text-align: center; display: block; margin-top: 1rem; text-decoration: none; color: #666;">Retour</a> -->
             </form>
         </div>
         <div class="reservation-right">
