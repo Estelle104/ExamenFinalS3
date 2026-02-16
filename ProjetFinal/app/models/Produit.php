@@ -7,14 +7,14 @@ class Produit extends Db
 {
     private $table = 'produits';
 
-    public function addProduit(string $nom, int $idCategorie, float $prixUnitaire): int
+    public static function addProduit(string $nom, int $idCategorie, float $prixUnitaire): int
     {
         $sql = "INSERT INTO {$this->table} (nom, id_categorie, prix_unitaire) VALUES (?, ?, ?)";
         $this->execute($sql, [$nom, $idCategorie, $prixUnitaire]);
         return (int) $this->db->lastInsertId();
     }
 
-    public function getAllProduits(): array
+    public static function getAllProduits(): array
     {
         $sql = "SELECT p.*, c.libelle AS categorie_libelle, c.description AS categorie_description
                 FROM {$this->table} p

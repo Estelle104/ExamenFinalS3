@@ -8,7 +8,7 @@ class Besoin extends Db
 {
     private $table = 'besoins';
 
-    public function addBesoin(
+    public static function addBesoin(
         string $description,
         int $idProduit,
         int $idVille,
@@ -46,7 +46,7 @@ class Besoin extends Db
         return (int) $this->db->lastInsertId();
     }
 
-    public function calculMontantBesoin(int $idBesoin): ?float
+    public static function calculMontantBesoin(int $idBesoin): ?float
     {
         $sql = "SELECT b.quantite, p.prix_unitaire, (b.quantite * p.prix_unitaire) AS montant
                 FROM {$this->table} b
@@ -58,5 +58,11 @@ class Besoin extends Db
         }
 
         return (float) $row['montant'];
+    }
+
+    public static function getAllBesoins(): array
+    {
+        $sql = "SELECT * FROM {$this->table} ORDER BY date_besoin ASC";
+        return $this->execute($sql)->fetchAll(PDO::FETCH_ASSOC);
     }
 }
