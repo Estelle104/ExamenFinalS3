@@ -9,7 +9,7 @@ CREATE OR REPLACE TABLE regions(
     nom VARCHAR(40) NOT NULL
 );
 
-CREATE OF REPLACE TABLE villes(
+CREATE OR REPLACE TABLE villes(
     id INT PRIMARY KEY AUTO_INCREMENT,
     nom VARCHAR(40) NOT NULL,
     id_region INT
@@ -47,13 +47,9 @@ CREATE OR REPLACE TABLE dons(
     donneur VARCHAR(40) NOT NULL
 );
 
-CREATE OR REPLACE TABLE type_etat(
+CREATE TABLE dispatch (
     id INT PRIMARY KEY AUTO_INCREMENT,
-    etat VARCHAR(40) NOT NULL
-);
-
-CREATE OR REPLACE TABLE etat_besoins(
-    id INT PRIMARY KEY AUTO_INCREMENT,
-    id_besoin INT,
-    id_etat INT
+    id_don INT NOT NULL,
+    id_besoin INT NOT NULL,
+    quantite_attribuee INT NOT NULL
 );
