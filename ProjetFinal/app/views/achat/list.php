@@ -2,46 +2,44 @@
     <div class="list-container">
         <div class="list-header">
             <h2>Liste des Achats Effectué</h2>
-            <a href="<?php echo Flight::get('flight.base_url'); ?>/besoins/add" class="btn-add">Ajouter un besoin</a>
+            <a href="<?php echo Flight::get('flight.base_url'); ?>/achat/add" class="btn-add">Ajouter un achat</a>
         </div>
 
         <div class="list-content">
             <?php 
-            use app\models\Besoin;
-            $besoinModel = new Besoin();
-            $besoins = $besoinModel->getAllBesoins();
+            use app\controllers\AchatController;
+            $achatController = new AchatController();
+            $achats = $achatController->listAchats();
             
-            if (!empty($besoins)): 
+            if (!empty($achats)): 
             ?>
                 <table class="list-table">
                     <thead>
                         <tr>
                             <th>ID</th>
-                            <th>Description</th>
                             <th>Produit</th>
                             <th>Ville</th>
                             <th>Quantité</th>
-                            <th>Actions</th>
+                            <th>Montant Total</th>
+                            <th>Date d'achat</th>
                         </tr>
                     </thead>
                     <tbody>
-                        <?php foreach ($besoins as $besoin): ?>
+                        <?php foreach ($achats as $achat): ?>
                             <tr>
-                                <td><?php echo htmlspecialchars((string)$besoin['id']); ?></td>
-                                <td><?php echo htmlspecialchars($besoin['description']); ?></td>
-                                <td><?php echo htmlspecialchars($besoin['id_produit'] ?? 'N/A'); ?></td>
-                                <td><?php echo htmlspecialchars($besoin['id_ville'] ?? 'N/A'); ?></td>
-                                <td><?php echo htmlspecialchars((string)$besoin['quantite']); ?></td>
-                                <td>
-                                    <a href="<?php echo Flight::get('flight.base_url'); ?>/dashboard" class="btn-view">Voir</a>
-                                </td>
+                                <td><?php echo htmlspecialchars((string)$achat['id']); ?></td>
+                                <td><?php echo htmlspecialchars($achat['id_produit'] ?? 'N/A'); ?></td>
+                                <td><?php echo htmlspecialchars($achat['id_ville'] ?? 'N/A'); ?></td>
+                                <td><?php echo htmlspecialchars((string)$achat['quantite']); ?></td>
+                                <td><?php echo htmlspecialchars($achat['montant_total'] ?? 'N/A'); ?></td>
+                                <td><?php echo htmlspecialchars($achat['date_achat'] ?? 'N/A'); ?></td>
                             </tr>
                         <?php endforeach; ?>
                     </tbody>
                 </table>
             <?php else: ?>
                 <div class="no-data">
-                    <p>Aucun besoin trouvé.</p>
+                    <p>Aucun achat trouvé.</p>
                 </div>
             <?php endif; ?>
         </div>
