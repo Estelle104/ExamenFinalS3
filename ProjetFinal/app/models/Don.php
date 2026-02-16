@@ -8,6 +8,10 @@ class Don extends Db
 {
     private $table = 'dons';
 
+    /**
+     * Ajoute un don.
+     * @return int Identifiant du don créé.
+     */
     public function addDon(
         string $description,
         int $idProduit,
@@ -24,6 +28,10 @@ class Don extends Db
         return (int) $this->db->lastInsertId();
     }
 
+    /**
+     * Récupère tous les dons avec le nom du produit et de la ville.
+     * @return array Liste des dons.
+     */
     public function getAllDons(): array
     {
         $sql = "SELECT d.*, p.nom AS produit_nom, v.nom AS ville_nom
@@ -34,12 +42,15 @@ class Don extends Db
         return $this->execute($sql)->fetchAll(PDO::FETCH_ASSOC);
     }
 
+    /**
+     * Simule l'attribution des dons aux besoins compatibles.
+     * @return array Résumé (dispatch_crees, dons_traite).
+     */
     public function simulerDispatch(): array
     {
         $summary = [
             'dispatch_crees' => 0,
             'dons_traite' => 0,
-            'besoins_mis_a_jour' => 0,
         ];
 
         $this->db->beginTransaction();
@@ -64,7 +75,6 @@ class Don extends Db
 
                     $remainingBesoin = $besoin['quantite'] - $this->getQuantiteAttribueePourBesoin((int) $besoin['id']);
                     if ($remainingBesoin <= 0) {
-                        $summary['besoins_mis_a_jour'] += $this->updateEtatBesoin((int) $besoin['id'], $besoin['quantite'], $remainingBesoin);
                         continue;
                     }
 
@@ -83,7 +93,6 @@ class Don extends Db
                     $remainingDon -= $quantiteAttribuee;
                     $remainingBesoin -= $quantiteAttribuee;
 
-                    $summary['besoins_mis_a_jour'] += $this->updateEtatBesoin((int) $besoin['id'], (int) $besoin['quantite'], $remainingBesoin);
                 }
             }
 
@@ -96,6 +105,10 @@ class Don extends Db
         return $summary;
     }
 
+    /**
+     * Calcule les totaux des besoins et dons par ville.
+     * @return array Liste des villes avec total_besoins et total_dons.
+     */
     public function statistiquesParVille(): array
     {
         $sql = "SELECT v.id, v.nom,
@@ -117,6 +130,30 @@ class Don extends Db
         return $this->execute($sql)->fetchAll(PDO::FETCH_ASSOC);
     }
 
+    /**
+     * Calcule les dons attribués par ville à partir du dispatch.
+     * @return array Liste des villes avec total_attribue.
+     */
+    public function statistiquesAttributionsParVille(): array
+    {
+        $sql = "SELECT v.id, v.nom,
+                       COALESCE(a.total_attribue, 0) AS total_attribue
+                FROM villes v
+                LEFT JOIN (
+                    SELECT b.id_ville, SUM(disp.quantite_attribuee) AS total_attribue
+                    FROM dispatch disp
+                    INNER JOIN besoins b ON b.id = disp.id_besoin
+                    GROUP BY b.id_ville
+                ) a ON a.id_ville = v.id
+                ORDER BY v.nom ASC";
+
+        return $this->execute($sql)->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+    /**
+     * Calcule les totaux globaux des besoins et des dons.
+     * @return array Tableau avec total_besoins et total_dons.
+     */
     public function getTotals(): array
     {
         $sql = "SELECT
@@ -127,12 +164,32 @@ class Don extends Db
         return $row ?: ['total_besoins' => 0, 'total_dons' => 0];
     }
 
+    /**
+     * Calcule le total global des dons attribués (dispatch).
+     * @return int Total attribué.
+     */
+    public function getTotalAttribue(): int
+    {
+        $sql = "SELECT COALESCE(SUM(quantite_attribuee), 0) AS total_attribue
+                FROM dispatch";
+        $row = $this->execute($sql)->fetch(PDO::FETCH_ASSOC);
+        return (int) ($row['total_attribue'] ?? 0);
+    }
+
+    /**
+     * Récupère les besoins compatibles pour un produit donné.
+     * @return array Liste des besoins compatibles.
+     */
     private function getBesoinsCompatibles(int $idProduit): array
     {
         $sql = "SELECT * FROM besoins WHERE id_produit = ? ORDER BY date_besoin ASC, id ASC";
         return $this->execute($sql, [$idProduit])->fetchAll(PDO::FETCH_ASSOC);
     }
 
+    /**
+     * Calcule la quantité déjà attribuée pour un don.
+     * @return int Quantité attribuée.
+     */
     private function getQuantiteAttribueePourDon(int $idDon): int
     {
         $sql = "SELECT COALESCE(SUM(quantite_attribuee), 0) AS total
@@ -142,6 +199,10 @@ class Don extends Db
         return (int) ($row['total'] ?? 0);
     }
 
+    /**
+     * Calcule la quantité déjà attribuée pour un besoin.
+     * @return int Quantité attribuée.
+     */
     private function getQuantiteAttribueePourBesoin(int $idBesoin): int
     {
         $sql = "SELECT COALESCE(SUM(quantite_attribuee), 0) AS total
@@ -151,21 +212,4 @@ class Don extends Db
         return (int) ($row['total'] ?? 0);
     }
 
-    private function updateEtatBesoin(int $idBesoin, int $quantiteTotale, int $restant): int
-    {
-        $etat = 'En attente';
-        if ($restant <= 0) {
-            $etat = 'Satisfait';
-        } elseif ($restant < $quantiteTotale) {
-            $etat = 'Partiel';
-        }
-
-        try {
-            $sql = "UPDATE besoins SET etat = ? WHERE id = ?";
-            $this->execute($sql, [$etat, $idBesoin]);
-            return 1;
-        } catch (PDOException $e) {
-            return 0;
-        }
-    }
 }

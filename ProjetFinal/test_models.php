@@ -13,32 +13,32 @@ function printSection(string $title): void {
     echo "\n===== {$title} =====\n";
 }
 
-printSection('Regions');
-$region = new Region();
-print_r($region->getAllRegions());
+// printSection('Regions');
+// $region = new Region();
+// print_r($region->getAllRegions());
 
-printSection('Villes');
-$ville = new Ville();
-print_r($ville->getAllVilles());
+// printSection('Villes');
+// $ville = new Ville();
+// print_r($ville->getAllVilles());
 
-printSection('Add Categorie');
-$categorie = new Categorie();
-$catId = $categorie->addCategorie('Test categorie', 'Categorie de test');
-var_dump($catId);
+// printSection('Add Categorie');
+// $categorie = new Categorie();
+// $catId = $categorie->addCategorie('Test categorie', 'Categorie de test');
+// var_dump($catId);
 
-printSection('Produits');
-$produit = new Produit();
-print_r($produit->getAllProduits());
+// printSection('Produits');
+// $produit = new Produit();
+// print_r($produit->getAllProduits());
 
-printSection('Add Besoin');
-$besoin = new Besoin();
-$besoinId = $besoin->addBesoin('Besoin test', 1, 1, null, 10);
-var_dump($besoinId);
+// printSection('Add Besoin');
+// $besoin = new Besoin();
+// $besoinId = $besoin->addBesoin('Besoin test', 1, 1, null, 10);
+// var_dump($besoinId);
 
-printSection('Add Don');
+// printSection('Add Don');
 $don = new Don();
-$donId = $don->addDon('Don test', 1, 1, 5, null, 'Test Donneur');
-var_dump($donId);
+// $donId = $don->addDon('Don test', 1, 1, 5, null, 'Test Donneur');
+// var_dump($donId);
 
 printSection('All Dons');
 print_r($don->getAllDons());

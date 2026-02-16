@@ -2,12 +2,15 @@
 namespace app\models;
 
 use PDO;
-use PDOException;
 
 class Besoin extends Db
 {
     private $table = 'besoins';
 
+    /**
+     * Ajoute un besoin.
+     * @return int Identifiant du besoin créé.
+     */
     public function addBesoin(
         string $description,
         int $idProduit,
@@ -18,34 +21,24 @@ class Besoin extends Db
     ): int {
         $dateBesoin = $dateBesoin ?: date('Y-m-d');
 
-        $sqlWithEtat = "INSERT INTO {$this->table} (description, id_produit, id_ville, id_region, quantite, date_besoin, etat)
-                        VALUES (?, ?, ?, ?, ?, ?, ?)";
-        try {
-            $this->execute($sqlWithEtat, [
-                $description,
-                $idProduit,
-                $idVille,
-                $idRegion,
-                $quantite,
-                $dateBesoin,
-                'En attente'
-            ]);
-        } catch (PDOException $e) {
-            $sql = "INSERT INTO {$this->table} (description, id_produit, id_ville, id_region, quantite, date_besoin)
-                    VALUES (?, ?, ?, ?, ?, ?)";
-            $this->execute($sql, [
-                $description,
-                $idProduit,
-                $idVille,
-                $idRegion,
-                $quantite,
-                $dateBesoin
-            ]);
-        }
+        $sql = "INSERT INTO {$this->table} (description, id_produit, id_ville, id_region, quantite, date_besoin)
+                VALUES (?, ?, ?, ?, ?, ?)";
+        $this->execute($sql, [
+            $description,
+            $idProduit,
+            $idVille,
+            $idRegion,
+            $quantite,
+            $dateBesoin
+        ]);
 
         return (int) $this->db->lastInsertId();
     }
 
+    /**
+     * Calcule le montant estimé d'un besoin (quantité * prix unitaire).
+     * @return float|null Montant calculé ou null si le besoin n'existe pas.
+     */
     public function calculMontantBesoin(int $idBesoin): ?float
     {
         $sql = "SELECT b.quantite, p.prix_unitaire, (b.quantite * p.prix_unitaire) AS montant
@@ -60,6 +53,10 @@ class Besoin extends Db
         return (float) $row['montant'];
     }
 
+    /**
+     * Récupère tous les besoins triés par date.
+     * @return array Liste des besoins.
+     */
     public function getAllBesoins(): array
     {
         $sql = "SELECT * FROM {$this->table} ORDER BY date_besoin ASC";

@@ -7,6 +7,10 @@ class Ville extends Db
 {
     private $table = 'villes';
 
+    /**
+     * Ajoute une ville rattachée à une région.
+     * @return int Identifiant de la ville créée.
+     */
     public function addVille(string $nom, int $idRegion): int
     {
         $sql = "INSERT INTO {$this->table} (nom, id_region) VALUES (?, ?)";
@@ -14,6 +18,10 @@ class Ville extends Db
         return (int) $this->db->lastInsertId();
     }
 
+    /**
+     * Récupère toutes les villes avec le nom de la région.
+     * @return array Liste des villes (avec champ region_nom).
+     */
     public function getAllVilles(): array
     {
         $sql = "SELECT v.*, r.nom AS region_nom
