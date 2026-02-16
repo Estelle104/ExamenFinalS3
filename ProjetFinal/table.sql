@@ -1,0 +1,10 @@
+DROP DATABASE IF EXISTS bngrc_final_s3;
+
+CREATE DATABASE bngrc_final_s3;
+
+USE bngrc_final_s3;
+
+CREATE OR REPLACE TABLE region(
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    name VARCHAR(255) NOT NULL
+);
