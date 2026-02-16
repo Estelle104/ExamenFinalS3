@@ -31,4 +31,10 @@ class VilleController {
 
         Flight::render('ville/add.php');
     }
+
+    public function getAllVilles() {
+        $villeModel = new Ville();
+        return $villeModel->getAllVilles();
+    }
+    
 }
