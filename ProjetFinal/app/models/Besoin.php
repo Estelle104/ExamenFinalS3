@@ -14,7 +14,7 @@ class Besoin extends Db
     public function addBesoin(
         string $description,
         int $idProduit,
-        int $idVille,
+        ?int $idVille,
         ?int $idRegion,
         int $quantite,
         ?string $dateBesoin = null

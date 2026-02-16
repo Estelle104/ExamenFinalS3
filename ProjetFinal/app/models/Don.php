@@ -15,15 +15,16 @@ class Don extends Db
     public function addDon(
         string $description,
         int $idProduit,
-        int $idVille,
+        ?int $idVille,
         int $quantite,
         ?string $dateDon,
-        string $donneur
+        string $donneur,
+        ?int $idRegion = null
     ): int {
         $dateDon = $dateDon ?: date('Y-m-d');
-        $sql = "INSERT INTO {$this->table} (description, id_produit, id_ville, quantite, date_don, donneur)
-                VALUES (?, ?, ?, ?, ?, ?)";
-        $this->execute($sql, [$description, $idProduit, $idVille, $quantite, $dateDon, $donneur]);
+        $sql = "INSERT INTO {$this->table} (description, id_produit, id_ville, id_region, quantite, date_don, donneur)
+                VALUES (?, ?, ?, ?, ?, ?, ?)";
+        $this->execute($sql, [$description, $idProduit, $idVille, $idRegion, $quantite, $dateDon, $donneur]);
         return (int) $this->db->lastInsertId();
     }
 
