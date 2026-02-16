@@ -29,7 +29,7 @@ class Don extends Db
                 FROM {$this->table} d
                 LEFT JOIN produits p ON p.id = d.id_produit
                 LEFT JOIN villes v ON v.id = d.id_ville
-                ORDER BY d.date_don DESC, d.id DESC";
+                ORDER BY d.date_don ASC, d.id DESC";
         return $this->execute($sql)->fetchAll(PDO::FETCH_ASSOC);
     }
 
