@@ -7,6 +7,10 @@ class Region extends Db
 {
     private $table = 'regions';
 
+    /**
+     * Ajoute une région dans la base.
+     * @return int Identifiant de la région créée.
+     */
     public function addRegion(string $nom): int
     {
         $sql = "INSERT INTO {$this->table} (nom) VALUES (?)";
@@ -14,6 +18,10 @@ class Region extends Db
         return (int) $this->db->lastInsertId();
     }
 
+    /**
+     * Récupère toutes les régions triées par nom.
+     * @return array Liste des régions.
+     */
     public function getAllRegions(): array
     {
         $sql = "SELECT * FROM {$this->table} ORDER BY nom ASC";

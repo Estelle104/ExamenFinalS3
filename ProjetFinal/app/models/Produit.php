@@ -7,6 +7,10 @@ class Produit extends Db
 {
     private $table = 'produits';
 
+    /**
+     * Ajoute un produit rattaché à une catégorie.
+     * @return int Identifiant du produit créé.
+     */
     public function addProduit(string $nom, int $idCategorie, float $prixUnitaire): int
     {
         $sql = "INSERT INTO {$this->table} (nom, id_categorie, prix_unitaire) VALUES (?, ?, ?)";
@@ -14,6 +18,10 @@ class Produit extends Db
         return (int) $this->db->lastInsertId();
     }
 
+    /**
+     * Récupère tous les produits avec les infos de catégorie.
+     * @return array Liste des produits (avec categorie_libelle, categorie_description).
+     */
     public function getAllProduits(): array
     {
         $sql = "SELECT p.*, c.libelle AS categorie_libelle, c.description AS categorie_description
