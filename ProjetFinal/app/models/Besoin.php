@@ -69,4 +69,5 @@ class Besoin extends Db
                 LEFT JOIN regions r ON r.id = b.id_region
                 ORDER BY b.date_besoin DESC, b.id DESC";
         return $this->execute($sql)->fetchAll(PDO::FETCH_ASSOC);
+    }
 }
