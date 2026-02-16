@@ -1,46 +1,66 @@
 <?php
+
 namespace app\controllers;
+
 use app\models\Achat;
 use Flight;
 
-class AchatController {
+class AchatController
+{
 
-    // 🔹 Ajouter un achat
-    public function addAchat() {
-        $achat = new Achat();
+    // Ajouter un achat
+    public function addAchat()
+    {
 
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
-            $id_produit = $_POST['id_produit'];
-            $id_ville   = $_POST['id_ville'];
-            $quantite   = $_POST['quantite'];
-            $prix_unitaire = $_POST['prix_unitaire'];
-            $frais = $_POST['frais']; // ex: 10 pour 10%
+            $achat = new Achat();
 
-            // 🔸 Calcul montant
+            $id_produit    = (int) $_POST['id_produit'];
+            $id_ville      = (int) $_POST['id_ville'];
+            $quantite      = (int) $_POST['quantite'];
+            $prix_unitaire = (float) $_POST['prix_unitaire'];
+            $frais         = (float) $_POST['frais'];
+            // $date_achat    = $_POST['date_achat'];
+            $date_achat = !empty($_POST['date_achat']) 
+            ? $_POST['date_achat'] 
+            : date('Y-m-d');
+
+
             $montant = $quantite * $prix_unitaire;
             $montant_total = $montant * (1 + ($frais / 100));
 
-            // 🔸 Vérifier argent disponible
-            $argentDisponible = $achat::getTotalArgentDisponible();
+            $argentDisponible = Achat::getTotalArgentDisponible();
 
             if ($argentDisponible < $montant_total) {
-                echo "Erreur : Fonds insuffisants.";
+                Flight::json([
+                    'success' => false,
+                    'message' => 'Fonds insuffisants.'
+                ]);
                 return;
             }
 
-            // 🔸 Enregistrer $achat
-            $achat::create($id_produit, $id_ville, $quantite, $montant_total);
+            $achat->addAchat(
+                $id_produit,
+                $id_ville,
+                $quantite,
+                $montant_total,
+                $date_achat   
+            );
 
-            echo "Achat effectué avec succès.";
+            Flight::json([
+                'success' => true,
+                'message' => 'Achat effectué avec succès.'
+            ]);
         }
     }
+    public function listAchats(){
 
-    // 🔹 Lister tous les achats
-    public function listAchats() {
         $achat = new Achat();
-        $achats = $achat::getAll();
-        require '../views/achats/liste.php';
-    }
+        $achats = $achat->getAllAchats();
 
+        Flight::render('achats/liste', [
+            'achats' => $achats
+        ]);
+    }
 }
