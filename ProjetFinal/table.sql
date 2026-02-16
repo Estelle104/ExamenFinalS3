@@ -73,6 +73,7 @@ CREATE OR REPLACE TABLE dons(
     description VARCHAR(255) NOT NULL,
     id_produit INT,
     id_ville INT,
+    id_region INT,
     quantite INT NOT NULL,
     date_don DATE,
     donneur VARCHAR(40) NOT NULL
