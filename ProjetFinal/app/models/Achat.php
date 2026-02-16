@@ -76,4 +76,19 @@ class Achat extends Db
         $this->execute($sql, [$id]);
         return 1;
     }
+
+    public static function getTotalArgentDisponible(): int
+    {
+        $instance = new self();
+        $sql = "SELECT COALESCE(SUM(quantite), 0) AS total
+                FROM dons
+                WHERE id_produit IN (
+                    SELECT id FROM produits WHERE nom LIKE ?
+                )";
+
+        $row = $instance->execute($sql, ['%Argent%'])->fetch(PDO::FETCH_ASSOC);
+
+        return (int) ($row['total'] ?? 0);
+    }
 }
+
