@@ -19,6 +19,9 @@ class DashboardController {
         $allBesoins = $besoinModel->getAllBesoins();
         $allDons = $donModel->getAllDons();
         
+        // Récupérer les allocations depuis dispatch
+        $dispatches = $this->getDispatches();
+        
         // Préparer les données pour le tableau
         $dashboard = [];
         
@@ -26,13 +29,16 @@ class DashboardController {
             // Filtrer les besoins de cette ville
             $besoinsVille = array_filter($allBesoins, fn($b) => $b['id_ville'] == $ville['id']);
             
-            // Filtrer les dons de cette ville
-            $donsVille = array_filter($allDons, fn($d) => $d['id_ville'] == $ville['id']);
-            
-            // Calculer le total des dons par ville
-            $totalDonsQuantite = 0;
-            foreach ($donsVille as $don) {
-                $totalDonsQuantite += $don['quantite'];
+            // Calculer les allocations reçues pour cette ville par dispatch
+            $quantiteAllouee = 0;
+            foreach ($dispatches as $dispatch) {
+                // Trouver le besoin correspondant
+                foreach ($besoinsVille as $besoin) {
+                    if ($besoin['id'] == $dispatch['id_besoin']) {
+                        $quantiteAllouee += $dispatch['quantite_attribuee'];
+                        break;
+                    }
+                }
             }
             
             // Calculer le total des besoins par ville
@@ -41,16 +47,16 @@ class DashboardController {
                 $totalBesoinsQuantite += $besoin['quantite'];
             }
             
-            // Déterminer l'état
+            // Déterminer l'état basé sur les allocations
             if (count($besoinsVille) == 0) {
                 $etat = 'N/A';
                 $pourcentage = 0;
-            } elseif ($totalDonsQuantite >= $totalBesoinsQuantite) {
+            } elseif ($quantiteAllouee >= $totalBesoinsQuantite) {
                 $etat = '✅ Satisfait';
                 $pourcentage = 100;
-            } elseif ($totalDonsQuantite > 0) {
+            } elseif ($quantiteAllouee > 0) {
                 $etat = '⏳ Partiel';
-                $pourcentage = round(($totalDonsQuantite / $totalBesoinsQuantite) * 100, 2);
+                $pourcentage = round(($quantiteAllouee / $totalBesoinsQuantite) * 100, 2);
             } else {
                 $etat = '❌ En attente';
                 $pourcentage = 0;
@@ -59,11 +65,9 @@ class DashboardController {
             $dashboard[] = [
                 'ville' => $ville,
                 'besoins' => $besoinsVille,
-                'dons' => $donsVille,
                 'totalBesoins' => count($besoinsVille),
-                'totalDons' => count($donsVille),
                 'totalBesoinsQuantite' => $totalBesoinsQuantite,
-                'totalDonsQuantite' => $totalDonsQuantite,
+                'totalAllouee' => $quantiteAllouee,
                 'etat' => $etat,
                 'pourcentage' => $pourcentage
             ];
@@ -75,5 +79,31 @@ class DashboardController {
             'totalBesoins' => count($allBesoins),
             'totalDons' => count($allDons)
         ]);
+    }
+
+    private function getDispatches() {
+        // Récupérer tous les dispatches
+        try {
+            $pdo = new \PDO(
+                "mysql:host=localhost;dbname=bngrc_final_s3;charset=utf8mb4",
+                'root',
+                '',
+                [\PDO::ATTR_ERRMODE => \PDO::ERRMODE_EXCEPTION]
+            );
+            $stmt = $pdo->query("SELECT * FROM dispatch");
+            return $stmt->fetchAll(\PDO::FETCH_ASSOC);
+        } catch (\Exception $e) {
+            return [];
+        }
+    }
+
+    public function simulate() {
+        $donModel = new Don();
+        $result = $donModel->simulerDispatch();
+        
+        $_SESSION['success'] = "Simulation complétée: {$result['dispatch_crees']} allocations créées, {$result['dons_traite']} dons traités";
+        
+        header('Location: ' . Flight::get('flight.base_url') . '/dashboard');
+        exit();
     }
 }

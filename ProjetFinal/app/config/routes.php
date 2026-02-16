@@ -74,4 +74,7 @@ $router->group('', function(Router $router) use ($app) {
     // Dashboard - l'objectif principal
     $router->get('/dashboard', [DashboardController::class, 'index']);
 
+    // Route de simulation - exécute l'allocation des dons aux besoins
+    $router->get('/simulate', [DashboardController::class, 'simulate']);
+
 });

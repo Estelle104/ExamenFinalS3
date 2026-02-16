@@ -6,6 +6,13 @@
         <div class="dashboard-left">
             <h2>Tableau de Bord BNGRC</h2>
             
+            <?php if (isset($_SESSION['success'])): ?>
+                <div class="alert alert-success" style="margin-bottom: 20px; padding: 1rem; background: #d4edda; color: #155724; border: 1px solid #c3e6cb; border-radius: 5px;">
+                    <?= htmlspecialchars($_SESSION['success']) ?>
+                    <?php unset($_SESSION['success']); ?>
+                </div>
+            <?php endif; ?>
+            
             <!-- Stats Cards -->
             <div class="stats-grid">
                 <div class="stat-card">
@@ -31,7 +38,7 @@
                                 <th>Ville</th>
                                 <th>Besoins</th>
                                 <th>Quantité nécessaire</th>
-                                <th>Quantité reçue</th>
+                                <th>Quantité allouée</th>
                                 <th>Progression</th>
                             </tr>
                         </thead>
@@ -41,7 +48,7 @@
                                     <td class="ville-name"><?php echo htmlspecialchars($item['ville']['nom']); ?></td>
                                     <td><?php echo $item['totalBesoins']; ?></td>
                                     <td><?php echo $item['totalBesoinsQuantite']; ?> unités</td>
-                                    <td><?php echo $item['totalDonsQuantite']; ?> unités</td>
+                                    <td><?php echo $item['totalAllouee']; ?> unités</td>
                                     <td>
                                         <div class="progress-bar">
                                             <div class="progress-fill" style="width: <?php echo min($item['pourcentage'], 100); ?>%"></div>
@@ -62,6 +69,7 @@
 
             <!-- Action Buttons -->
             <div class="dashboard-actions">
+                <a href="<?php echo Flight::get('flight.base_url'); ?>/simulate" class="btn-dashboard" style="background: #27ae60;">Simuler l'allocation</a>
                 <a href="<?php echo Flight::get('flight.base_url'); ?>/villes" class="btn-dashboard">Gérer les villes</a>
                 <a href="<?php echo Flight::get('flight.base_url'); ?>/besoins" class="btn-dashboard">Gérer les besoins</a>
                 <a href="<?php echo Flight::get('flight.base_url'); ?>/dons" class="btn-dashboard btn-primary">Ajouter un don</a>
