@@ -33,7 +33,8 @@ CREATE OR REPLACE TABLE besoins(
     description VARCHAR(255) NOT NULL,
     id_produit INT,
     id_ville INT,
-    quantite INT NOT NULL
+    quantite INT NOT NULL,
+    date_besoin DATE
 );
 
 
