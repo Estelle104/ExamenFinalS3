@@ -74,6 +74,17 @@ class DashboardController {
                 $etat = '❌ En attente';
                 $pourcentage = 0;
             }
+
+            // Date du besoin le plus ancien pour tri d'affichage
+            $oldestBesoinDate = null;
+            foreach ($besoinsVille as $besoin) {
+                $dateBesoin = $besoin['date_besoin'] ?? null;
+                if ($dateBesoin !== null && $dateBesoin !== '') {
+                    if ($oldestBesoinDate === null || $dateBesoin < $oldestBesoinDate) {
+                        $oldestBesoinDate = $dateBesoin;
+                    }
+                }
+            }
             
             $dashboard[] = [
                 'ville' => $ville,
@@ -84,9 +95,31 @@ class DashboardController {
                 'quantiteRestante' => $quantiteRestante,
                 'produits' => $produitsVille,
                 'etat' => $etat,
-                'pourcentage' => $pourcentage
+                'pourcentage' => $pourcentage,
+                'oldestBesoinDate' => $oldestBesoinDate
             ];
         }
+
+        usort($dashboard, function ($a, $b) {
+            $aDate = $a['oldestBesoinDate'] ?? null;
+            $bDate = $b['oldestBesoinDate'] ?? null;
+
+            if ($aDate === null && $bDate === null) {
+                return 0;
+            }
+            if ($aDate === null) {
+                return 1;
+            }
+            if ($bDate === null) {
+                return -1;
+            }
+
+            if ($aDate === $bDate) {
+                return 0;
+            }
+
+            return $aDate < $bDate ? -1 : 1;
+        });
 
         Flight::render('dashboard/index.php', [
             'dashboard' => $dashboard,

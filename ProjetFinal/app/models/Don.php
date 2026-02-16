@@ -191,13 +191,13 @@ class Don extends Db
             $sql .= "AND id_ville = ? ";
             $params[] = $idVille;
         }
-        // Sinon si don a une région → chercher besoins de la même région (sans ville)
+        // Sinon si don a une région → chercher besoins de la même région (toutes villes)
         elseif ($idRegion !== null) {
-            $sql .= "AND id_region = ? AND id_ville IS NULL ";
+            $sql .= "AND id_region = ? ";
             $params[] = $idRegion;
         }
         
-        $sql .= "ORDER BY date_besoin ASC, id ASC";
+        $sql .= "ORDER BY COALESCE(date_besoin, '0000-00-00') ASC, id ASC";
         return $this->execute($sql, $params)->fetchAll(PDO::FETCH_ASSOC);
     }
 
