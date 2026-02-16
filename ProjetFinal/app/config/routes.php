@@ -1,9 +1,6 @@
 <?php
 
 use app\controllers\UserController;
-use app\models\User;
-use app\middlewares\SecurityHeadersMiddleware;
-use app\models\Products;
 use flight\net\Router;
 use flight\Engine;
 
@@ -34,10 +31,6 @@ $router->group('', function(Router $router) use ($app) {
 // Groupe sécurisé
 $router->group('', function(Router $router) use ($app) {
 
-    Flight::route('/debug', function () {
-        echo 'BASE_URL = ' . Flight::get('flight.base_url');
-    });
-
     // Redirection racine
     $router->get('/', function() use ($app) {
         Flight::render('modele.php', [
@@ -57,4 +50,4 @@ $router->group('', function(Router $router) use ($app) {
     });
    
 
-}, [ SecurityHeadersMiddleware::class ]);
+});
