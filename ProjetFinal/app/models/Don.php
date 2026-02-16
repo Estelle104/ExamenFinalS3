@@ -95,7 +95,7 @@ class Don extends Db
         return $summary;
     }
 
-    public static function statistiquesParVille(): array
+    public function statistiquesParVille(): array
     {
         $sql = "SELECT v.id, v.nom,
                        COALESCE(b.total_besoins, 0) AS total_besoins,
@@ -116,7 +116,7 @@ class Don extends Db
         return $this->execute($sql)->fetchAll(PDO::FETCH_ASSOC);
     }
 
-    public static function getTotals(): array
+    public function getTotals(): array
     {
         $sql = "SELECT
                     (SELECT COALESCE(SUM(quantite), 0) FROM besoins) AS total_besoins,
@@ -126,13 +126,13 @@ class Don extends Db
         return $row ?: ['total_besoins' => 0, 'total_dons' => 0];
     }
 
-    private static function getBesoinsCompatibles(int $idProduit): array
+    private function getBesoinsCompatibles(int $idProduit): array
     {
         $sql = "SELECT * FROM besoins WHERE id_produit = ? ORDER BY date_besoin ASC, id ASC";
         return $this->execute($sql, [$idProduit])->fetchAll(PDO::FETCH_ASSOC);
     }
 
-    private static function getQuantiteAttribueePourDon(int $idDon): int
+    private function getQuantiteAttribueePourDon(int $idDon): int
     {
         $sql = "SELECT COALESCE(SUM(quantite_attribuee), 0) AS total
                 FROM dispatch
@@ -141,7 +141,7 @@ class Don extends Db
         return (int) ($row['total'] ?? 0);
     }
 
-    private static function getQuantiteAttribueePourBesoin(int $idBesoin): int
+    private function getQuantiteAttribueePourBesoin(int $idBesoin): int
     {
         $sql = "SELECT COALESCE(SUM(quantite_attribuee), 0) AS total
                 FROM dispatch
@@ -150,7 +150,7 @@ class Don extends Db
         return (int) ($row['total'] ?? 0);
     }
 
-    private static function updateEtatBesoin(int $idBesoin, int $quantiteTotale, int $restant): int
+    private function updateEtatBesoin(int $idBesoin, int $quantiteTotale, int $restant): int
     {
         $etat = 'En attente';
         if ($restant <= 0) {
