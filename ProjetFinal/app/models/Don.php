@@ -151,6 +151,14 @@ class Don extends Db
                         'INSERT INTO dispatch (id_don, id_besoin, quantite_attribuee) VALUES (?, ?, ?)',
                         [(int) $detail['id_don'], (int) $detail['id_besoin'], (int) $detail['quantite']]
                     );
+                    
+                    // Mettre à jour le besoin
+                    $besoin = $this->execute("SELECT * FROM besoins WHERE id = ?", [(int) $detail['id_besoin']])->fetch(PDO::FETCH_ASSOC);
+                    if ($besoin) {
+                        $newRestant = max(0, $besoin['quantite_restante'] - (int) $detail['quantite']);
+                        $this->updateEtatBesoin((int) $besoin['id'], (int) $besoin['quantite'], $newRestant);
+                    }
+                    
                     $summary['creations']++;
                 } catch (PDOException $e) {
                     $summary['erreurs']++;
@@ -163,6 +171,264 @@ class Don extends Db
         }
 
         return $summary;
+    }
+
+    /**
+     * Récupère les dons restants groupés par catégorie (produit)
+     */
+    public function getDonsRestantsParCategorie(): array
+    {
+        $sql = "SELECT 
+                    p.id AS id_produit,
+                    p.nom AS produit_nom,
+                    SUM(d.quantite) AS quantite_totale,
+                    COALESCE((
+                        SELECT SUM(disp.quantite_attribuee) 
+                        FROM dispatch disp 
+                        WHERE disp.id_don IN (SELECT id FROM dons WHERE id_produit = p.id)
+                    ), 0) AS quantite_attribuee
+                FROM dons d
+                INNER JOIN produits p ON p.id = d.id_produit
+                GROUP BY p.id, p.nom
+                HAVING (SUM(d.quantite) - COALESCE((
+                    SELECT SUM(disp.quantite_attribuee) 
+                    FROM dispatch disp 
+                    WHERE disp.id_don IN (SELECT id FROM dons WHERE id_produit = p.id)
+                ), 0)) > 0
+                ORDER BY p.nom ASC";
+        
+        $result = $this->execute($sql)->fetchAll(PDO::FETCH_ASSOC);
+        
+        // Calculer quantite_restante
+        foreach ($result as &$row) {
+            $row['quantite_restante'] = $row['quantite_totale'] - $row['quantite_attribuee'];
+        }
+        
+        return $result;
+    }
+
+    /**
+     * Récupère les IDs de tous les dons pour un produit donné
+     */
+    public function getIdsDonsPourProduit(int $idProduit): array
+    {
+        $sql = "SELECT id FROM dons WHERE id_produit = ?";
+        $stmt = $this->execute($sql, [$idProduit]);
+        $ids = [];
+        while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+            $ids[] = $row['id'];
+        }
+        return $ids;
+    }
+
+    /**
+     * Stratégie 1: Dispatch par date (besoins les plus anciens d'abord)
+     */
+    public function strategieParDate(int $idProduit): array
+    {
+        $details = [];
+        
+        // Récupérer les dons de ce produit avec leurs quantités restantes
+        $dons = $this->execute(
+            "SELECT d.*, 
+                    d.quantite - COALESCE((SELECT SUM(quantite_attribuee) FROM dispatch WHERE id_don = d.id), 0) AS restant
+             FROM dons d 
+             WHERE d.id_produit = ? 
+             HAVING restant > 0
+             ORDER BY d.date_don ASC, d.id ASC",
+            [$idProduit]
+        )->fetchAll(PDO::FETCH_ASSOC);
+
+        // Récupérer les besoins de ce produit avec leurs quantités restantes
+        $besoins = $this->execute(
+            "SELECT * FROM besoins 
+             WHERE id_produit = ? AND quantite_restante > 0
+             ORDER BY date_besoin ASC, id ASC",
+            [$idProduit]
+        )->fetchAll(PDO::FETCH_ASSOC);
+
+        foreach ($dons as $don) {
+            $remainingDon = (int) $don['restant'];
+            if ($remainingDon <= 0) continue;
+
+            foreach ($besoins as &$besoin) {
+                if ($remainingDon <= 0) break;
+                
+                $remainingBesoin = (int) $besoin['quantite_restante'];
+                if ($remainingBesoin <= 0) continue;
+
+                $quantite = min($remainingDon, $remainingBesoin);
+                
+                $details[] = [
+                    'id_don' => $don['id'],
+                    'id_besoin' => $besoin['id'],
+                    'quantite' => $quantite,
+                    'ville_nom' => $this->getVilleNom($besoin['id_ville'])
+                ];
+
+                $remainingDon -= $quantite;
+                $besoin['quantite_restante'] -= $quantite;
+            }
+        }
+
+        return $details;
+    }
+
+    /**
+     * Stratégie 2: Dispatch aux villes avec le moins de besoins d'abord
+     */
+    public function strategieMoinsBesoins(int $idProduit): array
+    {
+        $details = [];
+        
+        // Récupérer les dons de ce produit avec leurs quantités restantes
+        $dons = $this->execute(
+            "SELECT d.*, 
+                    d.quantite - COALESCE((SELECT SUM(quantite_attribuee) FROM dispatch WHERE id_don = d.id), 0) AS restant
+             FROM dons d 
+             WHERE d.id_produit = ? 
+             HAVING restant > 0
+             ORDER BY d.date_don ASC, d.id ASC",
+            [$idProduit]
+        )->fetchAll(PDO::FETCH_ASSOC);
+
+        // Récupérer les besoins groupés par ville, ordonnés par quantité totale croissante
+        $besoins = $this->execute(
+            "SELECT b.*, v.nom AS ville_nom,
+                    (SELECT SUM(quantite) FROM besoins WHERE id_ville = b.id_ville AND id_produit = ?) AS total_ville
+             FROM besoins b
+             LEFT JOIN villes v ON v.id = b.id_ville
+             WHERE b.id_produit = ? AND b.quantite_restante > 0
+             ORDER BY total_ville ASC, b.date_besoin ASC, b.id ASC",
+            [$idProduit, $idProduit]
+        )->fetchAll(PDO::FETCH_ASSOC);
+
+        foreach ($dons as $don) {
+            $remainingDon = (int) $don['restant'];
+            if ($remainingDon <= 0) continue;
+
+            foreach ($besoins as &$besoin) {
+                if ($remainingDon <= 0) break;
+                
+                $remainingBesoin = (int) $besoin['quantite_restante'];
+                if ($remainingBesoin <= 0) continue;
+
+                $quantite = min($remainingDon, $remainingBesoin);
+                
+                $details[] = [
+                    'id_don' => $don['id'],
+                    'id_besoin' => $besoin['id'],
+                    'quantite' => $quantite,
+                    'ville_nom' => $besoin['ville_nom'] ?? 'Inconnue'
+                ];
+
+                $remainingDon -= $quantite;
+                $besoin['quantite_restante'] -= $quantite;
+            }
+        }
+
+        return $details;
+    }
+
+    /**
+     * Stratégie 3: Dispatch proportionnel (répartition équitable)
+     */
+    public function strategieProportionnel(int $idProduit): array
+    {
+        $details = [];
+        
+        // Calculer la quantité totale de dons disponibles pour ce produit
+        $totalDonsDisponibles = $this->execute(
+            "SELECT SUM(d.quantite - COALESCE((SELECT SUM(quantite_attribuee) FROM dispatch WHERE id_don = d.id), 0)) AS total
+             FROM dons d 
+             WHERE d.id_produit = ?",
+            [$idProduit]
+        )->fetch(PDO::FETCH_ASSOC)['total'] ?? 0;
+
+        if ($totalDonsDisponibles <= 0) return $details;
+
+        // Récupérer les besoins groupés par ville
+        $besoinsParVille = $this->execute(
+            "SELECT b.id_ville, v.nom AS ville_nom, SUM(b.quantite_restante) AS total_restant
+             FROM besoins b
+             LEFT JOIN villes v ON v.id = b.id_ville
+             WHERE b.id_produit = ? AND b.quantite_restante > 0
+             GROUP BY b.id_ville, v.nom
+             ORDER BY v.nom ASC",
+            [$idProduit]
+        )->fetchAll(PDO::FETCH_ASSOC);
+
+        $totalBesoins = array_sum(array_column($besoinsParVille, 'total_restant'));
+        if ($totalBesoins <= 0) return $details;
+
+        // Récupérer les dons disponibles
+        $dons = $this->execute(
+            "SELECT d.*, 
+                    d.quantite - COALESCE((SELECT SUM(quantite_attribuee) FROM dispatch WHERE id_don = d.id), 0) AS restant
+             FROM dons d 
+             WHERE d.id_produit = ? 
+             HAVING restant > 0
+             ORDER BY d.date_don ASC, d.id ASC",
+            [$idProduit]
+        )->fetchAll(PDO::FETCH_ASSOC);
+
+        // Calculer la proportion pour chaque ville
+        foreach ($besoinsParVille as $villeData) {
+            $proportion = $villeData['total_restant'] / $totalBesoins;
+            $quantiteAllouee = (int) floor($totalDonsDisponibles * $proportion);
+            
+            if ($quantiteAllouee <= 0) continue;
+
+            // Récupérer les besoins de cette ville
+            $besoinsVille = $this->execute(
+                "SELECT * FROM besoins 
+                 WHERE id_produit = ? AND id_ville = ? AND quantite_restante > 0
+                 ORDER BY date_besoin ASC, id ASC",
+                [$idProduit, $villeData['id_ville']]
+            )->fetchAll(PDO::FETCH_ASSOC);
+
+            $remainingAlloue = $quantiteAllouee;
+
+            foreach ($dons as &$don) {
+                if ($remainingAlloue <= 0) break;
+                
+                $remainingDon = (int) $don['restant'];
+                if ($remainingDon <= 0) continue;
+
+                foreach ($besoinsVille as &$besoin) {
+                    if ($remainingAlloue <= 0 || $remainingDon <= 0) break;
+                    
+                    $remainingBesoin = (int) $besoin['quantite_restante'];
+                    if ($remainingBesoin <= 0) continue;
+
+                    $quantite = min($remainingDon, $remainingBesoin, $remainingAlloue);
+                    
+                    $details[] = [
+                        'id_don' => $don['id'],
+                        'id_besoin' => $besoin['id'],
+                        'quantite' => $quantite,
+                        'ville_nom' => $villeData['ville_nom'] ?? 'Inconnue'
+                    ];
+
+                    $remainingDon -= $quantite;
+                    $don['restant'] -= $quantite;
+                    $besoin['quantite_restante'] -= $quantite;
+                    $remainingAlloue -= $quantite;
+                }
+            }
+        }
+
+        return $details;
+    }
+
+    /**
+     * Récupère le nom d'une ville
+     */
+    private function getVilleNom(?int $idVille): string
+    {
+        if (!$idVille) return 'Non spécifié';
+        $result = $this->execute("SELECT nom FROM villes WHERE id = ?", [$idVille])->fetch(PDO::FETCH_ASSOC);
+        return $result['nom'] ?? 'Inconnue';
     }
 
     public function simulerDispatch(): array
