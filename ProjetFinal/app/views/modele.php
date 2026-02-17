@@ -10,9 +10,9 @@ $navItems = isset($navItems) ? $navItems : [
     ['label' => 'Dons', 'url' => $baseUrl . '/dons', 'id' => 'dons'],
     ['label' => 'Achats', 'url' => $baseUrl . '/achat/list', 'id' => 'achat'],
     ['label' => 'Récapitulatif', 'url' => $baseUrl . '/recapitulatif', 'id' => 'recapitulatif'],
-    ['label' => 'Frais', 'url' => $baseUrl . '/achat/frais', 'id' => 'frais'],
-    ['label' => 'Villes', 'url' => $baseUrl . '/villes', 'id' => 'ville'],
-    ['label' => 'Régions', 'url' => $baseUrl . '/regions', 'id' => 'region']
+    ['label' => 'Frais', 'url' => $baseUrl . '/achat/frais', 'id' => 'frais']
+    // ['label' => 'Villes', 'url' => $baseUrl . '/villes', 'id' => 'ville'],
+    // ['label' => 'Régions', 'url' => $baseUrl . '/regions', 'id' => 'region']
 ];
 
 

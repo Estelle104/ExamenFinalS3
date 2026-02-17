@@ -26,8 +26,6 @@ if (empty($app) === true) {
 // You'll need to namespace your classes with "app\folder\" to include them properly
 $app->path(__DIR__ . $ds . '..' . $ds . '..');
 
-// Core config variables
-// define('BASE_URL', '/ETU004185/livraisonNoelS3');
 if (!defined('BASE_URL')) {
     define(
         'BASE_URL',
@@ -35,11 +33,6 @@ if (!defined('BASE_URL')) {
 
     );
 }
-
-// define(
-//     'BASE_URL',
-//     '/ETU004219/livraisonNoelS3'
-// );
 
 $app->set('flight.base_url', BASE_URL);           // Base URL for your app. Change if app is in a subdirectory (e.g., '/myapp/')
 $app->set('flight.case_sensitive', false);    // Set true for case sensitive routes. Default: false
@@ -74,9 +67,9 @@ return [
 // 		// MySQL Example:
 // 		'host'     => 'localhost',  
 // 		// 'port'	   => '3306',    // Database host (e.g., 'localhost', 'db.example.com')
-// 		'dbname'   => 'db_s2_ETU004219',   // Database name (e.g., 'flightphp')
-// 		'user'     => 'ETU004219',  // Database user (e.g., 'root')
-// 		'password' => '0PtxTqR3',  // Database password (never commit real passwords)
+// 		'dbname'   => 'db_s2_ETU004185',   // Database name (e.g., 'flightphp')
+// 		'user'     => 'ETU004185',  // Database user (e.g., 'root')
+// 		'password' => 'aDivEtrZ',  // Database password (never commit real passwords)
 
 		
 // 		// SQLite Example:
