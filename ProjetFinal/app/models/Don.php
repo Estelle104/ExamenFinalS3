@@ -46,6 +46,125 @@ class Don extends Db
      * Simule l'attribution des dons aux besoins compatibles.
      * @return array Résumé (dispatch_crees, dons_traite).
      */
+    /**
+     * Prévisualise la simulation sans modifier la BDD
+     */
+    public function previewDispatch(): array
+    {
+        $summary = [
+            'dispatch_crees' => 0,
+            'dons_traite' => 0,
+            'details' => []
+        ];
+
+        // Récalculer les quantités restantes basées sur les achats effectués
+        $achats = $this->execute("SELECT * FROM achats ORDER BY date_achat ASC, id ASC")
+            ->fetchAll(PDO::FETCH_ASSOC);
+
+        $besoinsRestants = [];
+        $besoinsData = $this->execute("SELECT id, quantite FROM besoins")->fetchAll(PDO::FETCH_ASSOC);
+        
+        foreach ($besoinsData as $besoin) {
+            $besoinsRestants[$besoin['id']] = $besoin['quantite'];
+        }
+
+        // Appliquer les achats pour calculer les restants
+        foreach ($achats as $achat) {
+            $besoins = $this->execute(
+                "SELECT id, quantite FROM besoins WHERE id_produit = ? AND COALESCE(quantite_restante, quantite) > 0",
+                [(int) $achat['id_produit']]
+            )->fetchAll(PDO::FETCH_ASSOC);
+
+            $remaining = $achat['quantite'];
+            foreach ($besoins as $besoin) {
+                if ($remaining <= 0) break;
+                $restant = $besoinsRestants[$besoin['id']] ?? $besoin['quantite'];
+                if ($restant <= 0) continue;
+                
+                $utilise = min($remaining, $restant);
+                $besoinsRestants[$besoin['id']] = $restant - $utilise;
+                $remaining -= $utilise;
+            }
+        }
+
+        // Simuler l'allocation des dons
+        $dons = $this->execute(
+            "SELECT * FROM {$this->table} ORDER BY date_don ASC, id ASC"
+        )->fetchAll(PDO::FETCH_ASSOC);
+
+        foreach ($dons as $don) {
+            $remainingDon = $don['quantite'] - $this->getQuantiteAttribueePourDon((int) $don['id']);
+            if ($remainingDon <= 0) {
+                continue;
+            }
+
+            $summary['dons_traite']++;
+
+            $besoins = $this->getBesoinsCompatibles(
+                (int) $don['id_produit'],
+                $don['id_ville'] ? (int) $don['id_ville'] : null,
+                $don['id_region'] ? (int) $don['id_region'] : null
+            );
+
+            foreach ($besoins as $besoin) {
+                if ($remainingDon <= 0) {
+                    break;
+                }
+
+                $remainingBesoin = $besoinsRestants[$besoin['id']] ?? 0;
+                if ($remainingBesoin <= 0) {
+                    continue;
+                }
+
+                $quantiteAttribuee = min($remainingDon, $remainingBesoin);
+                if ($quantiteAttribuee <= 0) {
+                    continue;
+                }
+
+                $summary['details'][] = [
+                    'id_don' => $don['id'],
+                    'id_besoin' => $besoin['id'],
+                    'quantite' => $quantiteAttribuee
+                ];
+
+                $summary['dispatch_crees']++;
+                $remainingDon -= $quantiteAttribuee;
+                $besoinsRestants[$besoin['id']] -= $quantiteAttribuee;
+            }
+        }
+
+        return $summary;
+    }
+
+    /**
+     * Valide la simulation et applique réellement les changements
+     */
+    public function validerDispatch(array $details): array
+    {
+        $summary = ['creations' => 0, 'erreurs' => 0];
+
+        $this->db->beginTransaction();
+        try {
+            foreach ($details as $detail) {
+                try {
+                    $this->execute(
+                        'INSERT INTO dispatch (id_don, id_besoin, quantite_attribuee) VALUES (?, ?, ?)',
+                        [(int) $detail['id_don'], (int) $detail['id_besoin'], (int) $detail['quantite']]
+                    );
+                    $summary['creations']++;
+                } catch (PDOException $e) {
+                    $summary['erreurs']++;
+                }
+            }
+            $this->db->commit();
+        } catch (PDOException $e) {
+            $this->db->rollBack();
+            $summary['erreurs']++;
+        }
+
+        return $summary;
+    }
+
     public function simulerDispatch(): array
     {
         $summary = [

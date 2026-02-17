@@ -150,9 +150,53 @@ class DashboardController {
 
     public function simulate() {
         $donModel = new Don();
-        $result = $donModel->simulerDispatch();
+        $preview = $donModel->previewDispatch();
         
-        $_SESSION['success'] = "Simulation complétée: {$result['dispatch_crees']} allocations créées, {$result['dons_traite']} dons traités";
+        $_SESSION['simulation_preview'] = $preview;
+        
+        header('Location: ' . Flight::get('flight.base_url') . '/simulate-preview');
+        exit();
+    }
+
+    public function previewSimulation() {
+        $preview = $_SESSION['simulation_preview'] ?? null;
+        
+        if (!$preview) {
+            $_SESSION['error'] = 'Aucune simulation en cours.';
+            header('Location: ' . Flight::get('flight.base_url') . '/dashboard');
+            exit();
+        }
+
+        Flight::render('modele.php', [
+            'contentPage' => 'dashboard/simulation-preview',
+            'currentPage' => 'dashboard',
+            'pageTitle' => 'Aperçu Simulation - BNGRC',
+            'preview' => $preview
+        ]);
+    }
+
+    public function validerSimulation() {
+        $preview = $_SESSION['simulation_preview'] ?? null;
+        
+        if (!$preview || !isset($preview['details'])) {
+            $_SESSION['error'] = 'Simulation invalide.';
+            header('Location: ' . Flight::get('flight.base_url') . '/dashboard');
+            exit();
+        }
+
+        $donModel = new Don();
+        $result = $donModel->validerDispatch($preview['details']);
+        
+        $_SESSION['success'] = "Dispatch validé: {$result['creations']} allocations créées.";
+        unset($_SESSION['simulation_preview']);
+        
+        header('Location: ' . Flight::get('flight.base_url') . '/dashboard');
+        exit();
+    }
+
+    public function annulerSimulation() {
+        unset($_SESSION['simulation_preview']);
+        $_SESSION['info'] = 'Simulation annulée.';
         
         header('Location: ' . Flight::get('flight.base_url') . '/dashboard');
         exit();

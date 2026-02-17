@@ -78,8 +78,11 @@ $router->group('', function(Router $router) use ($app) {
     // Dashboard - l'objectif principal
     $router->get('/dashboard', [DashboardController::class, 'index']);
 
-    // Route de simulation - exécute l'allocation des dons aux besoins
+    // Route de simulation - affiche l'aperçu
     $router->get('/simulate', [DashboardController::class, 'simulate']);
+    $router->get('/simulate-preview', [DashboardController::class, 'previewSimulation']);
+    $router->get('/simulate-valider', [DashboardController::class, 'validerSimulation']);
+    $router->get('/simulate-annuler', [DashboardController::class, 'annulerSimulation']);
 
     // Page de récapitulatif AJAX
     $router->get('/recapitulatif', [RecapitulatifController::class, 'index']);
