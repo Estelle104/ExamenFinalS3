@@ -47,12 +47,13 @@
                         $sumQuantite = 0;
                         $sumAllouee = 0;
                         $sumRestante = 0;
+                        $rowIndex = 0;
                     ?>
                     <table class="dashboard-table">
                         <thead>
                             <tr>
                                 <th>Ville</th>
-                                <th>Produits demandés</th>
+                                <th>Catégories</th>
                                 <th>Besoins</th>
                                 <th>Quantité nécessaire</th>
                                 <th>Quantité allouée</th>
@@ -68,14 +69,21 @@
                                     $sumQuantite += $item['totalBesoinsQuantite'];
                                     $sumAllouee += $item['quantiteAllouee'];
                                     $sumRestante += $item['quantiteRestante'];
+                                    $rowIndex++;
+                                    $hasCategories = !empty($item['parCategorie']);
                                 ?>
-                                <tr>
-                                    <td class="ville-name"><?php echo htmlspecialchars($item['ville']['nom']); ?></td>
+                                <tr class="ville-row <?php echo $hasCategories ? 'expandable' : ''; ?>" data-row="<?php echo $rowIndex; ?>">
+                                    <td class="ville-name">
+                                        <?php if ($hasCategories): ?>
+                                            <span class="expand-icon">▶</span>
+                                        <?php endif; ?>
+                                        <?php echo htmlspecialchars($item['ville']['nom']); ?>
+                                    </td>
                                     <td>
                                         <?php if (!empty($item['produits'])): ?>
                                             <div class="product-chips">
-                                                <?php foreach ($item['produits'] as $produitNom): ?>
-                                                    <span class="chip"><?php echo htmlspecialchars($produitNom); ?></span>
+                                                <?php foreach ($item['produits'] as $categorie): ?>
+                                                    <span class="chip chip-categorie"><?php echo htmlspecialchars($categorie); ?></span>
                                                 <?php endforeach; ?>
                                             </div>
                                         <?php else: ?>
@@ -106,13 +114,54 @@
                                         </div>
                                         <small><?php echo $item['pourcentage']; ?>%</small>
                                     </td>
-                                    
                                 </tr>
+                                <?php if ($hasCategories): ?>
+                                    <?php foreach ($item['parCategorie'] as $cat): ?>
+                                        <?php
+                                            $catPourcentage = $cat['quantiteNecessaire'] > 0 
+                                                ? round(($cat['quantiteAllouee'] / $cat['quantiteNecessaire']) * 100, 2) 
+                                                : 0;
+                                        ?>
+                                        <tr class="sub-row sub-row-<?php echo $rowIndex; ?>" style="display: none;">
+                                            <td class="sub-cell-indent">
+                                                <span class="sub-indicator">└</span>
+                                                <span class="sub-categorie-name"><?php echo htmlspecialchars($cat['nom']); ?></span>
+                                            </td>
+                                            <td>
+                                                <div class="product-chips product-chips-small">
+                                                    <?php foreach ($cat['produits'] as $produit): ?>
+                                                        <span class="chip chip-small"><?php echo htmlspecialchars($produit); ?></span>
+                                                    <?php endforeach; ?>
+                                                </div>
+                                            </td>
+                                            <td class="sub-cell"><?php echo $cat['nbBesoins']; ?></td>
+                                            <td class="sub-cell"><?php echo $cat['quantiteNecessaire']; ?> unités</td>
+                                            <td class="sub-cell"><?php echo $cat['quantiteAllouee']; ?> unités</td>
+                                            <td class="sub-cell"><?php echo $cat['quantiteRestante']; ?> unités</td>
+                                            <td class="sub-cell">
+                                                <?php if ($cat['quantiteRestante'] <= 0): ?>
+                                                    <span class="badge badge-satisfait badge-small">✓</span>
+                                                <?php elseif ($cat['quantiteAllouee'] > 0): ?>
+                                                    <span class="badge badge-partiel badge-small">~</span>
+                                                <?php else: ?>
+                                                    <span class="badge badge-attente badge-small">✗</span>
+                                                <?php endif; ?>
+                                            </td>
+                                            <td class="sub-cell">
+                                                <div class="progress-bar progress-bar-small">
+                                                    <div class="progress-fill" style="width: <?php echo min($catPourcentage, 100); ?>%"></div>
+                                                </div>
+                                                <small><?php echo $catPourcentage; ?>%</small>
+                                            </td>
+                                        </tr>
+                                    <?php endforeach; ?>
+                                <?php endif; ?>
                             <?php endforeach; ?>
                         </tbody>
                         <tfoot>
                             <tr>
                                 <td class="ville-name">Total</td>
+                                <td></td>
                                 <td><?php echo $sumBesoins; ?></td>
                                 <td><?php echo $sumQuantite; ?> unités</td>
                                 <td><?php echo $sumAllouee; ?> unités</td>
@@ -142,7 +191,7 @@
                             </tr>
                         </tfoot>
                     </table>
-                    <p class="table-note">État basé sur la quantité restante des besoins. La progression correspond au taux de couverture allouée.</p>
+                    <p class="table-note">Cliquez sur une ville pour voir les détails par catégorie. État basé sur la quantité restante des besoins.</p>
                 <?php else: ?>
                     <div class="no-data">
                         <p>Aucune donnée disponible pour le moment.</p>
@@ -767,6 +816,101 @@ body {
     }
 }
 
+/* ===== STYLES POUR SOUS-LIGNES PAR CATÉGORIE ===== */
+.ville-row.expandable {
+    cursor: pointer;
+}
+
+.ville-row.expandable:hover {
+    background: #f0f9ff !important;
+}
+
+.expand-icon {
+    display: inline-block;
+    margin-right: 0.5rem;
+    font-size: 0.7rem;
+    color: #64748b;
+    transition: transform 0.2s ease;
+}
+
+.ville-row.expanded .expand-icon {
+    transform: rotate(90deg);
+}
+
+.sub-row {
+    background: #f8fafc;
+    border-left: 3px solid #e0e7ff;
+}
+
+.sub-row:hover {
+    background: #f1f5f9 !important;
+}
+
+.sub-cell-indent {
+    padding-left: 2rem !important;
+    color: #64748b;
+}
+
+.sub-indicator {
+    color: #cbd5e1;
+    margin-right: 0.5rem;
+    font-family: monospace;
+}
+
+.sub-categorie-name {
+    font-weight: 600;
+    color: #475569;
+    font-size: 0.9rem;
+}
+
+.sub-cell {
+    font-size: 0.875rem;
+    color: #64748b;
+}
+
+.chip-categorie {
+    background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+    color: white;
+    font-weight: 600;
+}
+
+.chip-small {
+    padding: 0.2rem 0.5rem;
+    font-size: 0.75rem;
+    background: #e2e8f0;
+    color: #475569;
+}
+
+.product-chips-small {
+    gap: 0.3rem;
+}
+
+.badge-small {
+    padding: 0.15rem 0.4rem;
+    font-size: 0.75rem;
+    min-width: auto;
+}
+
+.progress-bar-small {
+    height: 6px;
+}
+
+/* Animation d'apparition des sous-lignes */
+.sub-row.showing {
+    animation: slideDown 0.2s ease-out forwards;
+}
+
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
 /* ===== MODE SOMBRE (optionnel) ===== */
 @media (prefers-color-scheme: dark) {
     :root {
@@ -791,3 +935,36 @@ body {
     }
 }
 </style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Gestion de l'expansion des lignes de ville
+    const villeRows = document.querySelectorAll('.ville-row.expandable');
+    
+    villeRows.forEach(function(row) {
+        row.addEventListener('click', function() {
+            const rowId = this.getAttribute('data-row');
+            const subRows = document.querySelectorAll('.sub-row-' + rowId);
+            const isExpanded = this.classList.contains('expanded');
+            
+            if (isExpanded) {
+                // Fermer
+                this.classList.remove('expanded');
+                subRows.forEach(function(subRow) {
+                    subRow.style.display = 'none';
+                    subRow.classList.remove('showing');
+                });
+            } else {
+                // Ouvrir
+                this.classList.add('expanded');
+                subRows.forEach(function(subRow, index) {
+                    subRow.style.display = '';
+                    subRow.classList.add('showing');
+                    // Décalage pour animation en cascade
+                    subRow.style.animationDelay = (index * 0.05) + 's';
+                });
+            }
+        });
+    });
+});
+</script>

@@ -99,8 +99,80 @@ INSERT INTO besoins (description, id_produit, id_ville, quantite, quantite_resta
 -- Ordre 26: Farafangana - Bois - 100
 ('Besoin Bois Farafangana', 8, 3, 100, 100, 'En attente', '2026-02-15');
 
--- ============================================================
--- Vérification
--- ============================================================
-SELECT 'INSERTION TERMINÉE' AS statut;
-SELECT COUNT(*) AS nombre_besoins FROM besoins;
+-- ===============================
+-- DONS ARGENT
+-- ===============================
+
+INSERT INTO dons (description, id_produit, id_ville, id_region, quantite, date_don, donneur)
+SELECT 'Don Argent', id, NULL, NULL, 5000000, '2026-02-16', 'Don anonyme'
+FROM produits WHERE nom = 'Argent';
+
+INSERT INTO dons (description, id_produit, id_ville, id_region, quantite, date_don, donneur)
+SELECT 'Don Argent', id, NULL, NULL, 3000000, '2026-02-16', 'Don anonyme'
+FROM produits WHERE nom = 'Argent';
+
+INSERT INTO dons (description, id_produit, id_ville, id_region, quantite, date_don, donneur)
+SELECT 'Don Argent', id, NULL, NULL, 4000000, '2026-02-17', 'Don anonyme'
+FROM produits WHERE nom = 'Argent';
+
+INSERT INTO dons (description, id_produit, id_ville, id_region, quantite, date_don, donneur)
+SELECT 'Don Argent', id, NULL, NULL, 1500000, '2026-02-17', 'Don anonyme'
+FROM produits WHERE nom = 'Argent';
+
+INSERT INTO dons (description, id_produit, id_ville, id_region, quantite, date_don, donneur)
+SELECT 'Don Argent', id, NULL, NULL, 6000000, '2026-02-17', 'Don anonyme'
+FROM produits WHERE nom = 'Argent';
+
+INSERT INTO dons (description, id_produit, id_ville, id_region, quantite, date_don, donneur)
+SELECT 'Don Argent', id, NULL, NULL, 2000000, '2026-02-19', 'Don anonyme'
+FROM produits WHERE nom = 'Argent';
+
+
+-- ===============================
+-- DONS NATURE
+-- ===============================
+
+INSERT INTO dons (description, id_produit, id_ville, id_region, quantite, date_don, donneur)
+SELECT 'Don Riz', id, NULL, NULL, 400, '2026-02-16', 'Don anonyme'
+FROM produits WHERE nom = 'Riz (kg)';
+
+INSERT INTO dons (description, id_produit, id_ville, id_region, quantite, date_don, donneur)
+SELECT 'Don Eau', id, NULL, NULL, 600, '2026-02-16', 'Don anonyme'
+FROM produits WHERE nom = 'Eau (L)';
+
+INSERT INTO dons (description, id_produit, id_ville, id_region, quantite, date_don, donneur)
+SELECT 'Don Haricots', id, NULL, NULL, 100, '2026-02-17', 'Don anonyme'
+FROM produits WHERE nom = 'Haricots';
+
+INSERT INTO dons (description, id_produit, id_ville, id_region, quantite, date_don, donneur)
+SELECT 'Don Riz', id, NULL, NULL, 2000, '2026-02-18', 'Don anonyme'
+FROM produits WHERE nom = 'Riz (kg)';
+
+INSERT INTO dons (description, id_produit, id_ville, id_region, quantite, date_don, donneur)
+SELECT 'Don Eau', id, NULL, NULL, 5000, '2026-02-18', 'Don anonyme'
+FROM produits WHERE nom = 'Eau (L)';
+
+INSERT INTO dons (description, id_produit, id_ville, id_region, quantite, date_don, donneur)
+SELECT 'Don Haricots', id, NULL, NULL, 88, '2026-02-17', 'Don anonyme'
+FROM produits WHERE nom = 'Haricots';
+
+
+-- ===============================
+-- DONS MATERIEL
+-- ===============================
+
+INSERT INTO dons (description, id_produit, id_ville, id_region, quantite, date_don, donneur)
+SELECT 'Don Tôle', id, NULL, NULL, 50, '2026-02-17', 'Don anonyme'
+FROM produits WHERE nom = 'Tôle';
+
+INSERT INTO dons (description, id_produit, id_ville, id_region, quantite, date_don, donneur)
+SELECT 'Don Bâche', id, NULL, NULL, 70, '2026-02-17', 'Don anonyme'
+FROM produits WHERE nom = 'Bâche';
+
+INSERT INTO dons (description, id_produit, id_ville, id_region, quantite, date_don, donneur)
+SELECT 'Don Tôle', id, NULL, NULL, 300, '2026-02-18', 'Don anonyme'
+FROM produits WHERE nom = 'Tôle';
+
+INSERT INTO dons (description, id_produit, id_ville, id_region, quantite, date_don, donneur)
+SELECT 'Don Bâche', id, NULL, NULL, 500, '2026-02-19', 'Don anonyme'
+FROM produits WHERE nom = 'Bâche';
