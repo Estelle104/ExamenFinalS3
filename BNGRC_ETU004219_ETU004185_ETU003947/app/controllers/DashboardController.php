@@ -5,6 +5,7 @@ use app\models\Ville;
 use app\models\Besoin;
 use app\models\Don;
 use app\models\Produit;
+use app\models\Categorie;
 
 use Flight;
 
@@ -15,14 +16,24 @@ class DashboardController {
         $besoinModel = new Besoin();
         $donModel = new Don();
         $produitModel = new Produit();
+        $categorieModel = new Categorie();
         
         $villes = $villeModel->getAllVilles();
         $allBesoins = $besoinModel->getAllBesoins();
         $allDons = $donModel->getAllDons();
         $allProduits = $produitModel->getAllProduits();
+        $allCategories = $categorieModel->getAllCategories();
+        
+        // Index des produits par ID
         $produitsById = [];
         foreach ($allProduits as $produit) {
-            $produitsById[$produit['id']] = $produit['nom'];
+            $produitsById[$produit['id']] = $produit;
+        }
+        
+        // Index des catégories par ID
+        $categoriesById = [];
+        foreach ($allCategories as $categorie) {
+            $categoriesById[$categorie['id']] = $categorie['libelle'];
         }
         
         $dashboard = [];
@@ -35,14 +46,44 @@ class DashboardController {
                 $quantiteRestante += ($besoin['quantite_restante'] ?? $besoin['quantite']);
             }
 
-            $produitsVille = [];
+            // Grouper par catégorie
+            $parCategorie = [];
             foreach ($besoinsVille as $besoin) {
                 $idProduit = $besoin['id_produit'] ?? null;
                 if ($idProduit && isset($produitsById[$idProduit])) {
-                    $produitsVille[$produitsById[$idProduit]] = true;
+                    $produit = $produitsById[$idProduit];
+                    $idCategorie = $produit['id_categorie'] ?? 0;
+                    $nomCategorie = $categoriesById[$idCategorie] ?? 'Autre';
+                    
+                    if (!isset($parCategorie[$nomCategorie])) {
+                        $parCategorie[$nomCategorie] = [
+                            'nom' => $nomCategorie,
+                            'produits' => [],
+                            'nbBesoins' => 0,
+                            'quantiteNecessaire' => 0,
+                            'quantiteAllouee' => 0,
+                            'quantiteRestante' => 0
+                        ];
+                    }
+                    
+                    // Ajouter le produit à la liste
+                    $parCategorie[$nomCategorie]['produits'][$produit['nom']] = true;
+                    $parCategorie[$nomCategorie]['nbBesoins']++;
+                    $parCategorie[$nomCategorie]['quantiteNecessaire'] += $besoin['quantite'];
+                    $restantBesoin = $besoin['quantite_restante'] ?? $besoin['quantite'];
+                    $parCategorie[$nomCategorie]['quantiteRestante'] += $restantBesoin;
+                    $parCategorie[$nomCategorie]['quantiteAllouee'] += ($besoin['quantite'] - $restantBesoin);
                 }
             }
-            $produitsVille = array_keys($produitsVille);
+            
+            // Convertir les produits en liste
+            foreach ($parCategorie as &$cat) {
+                $cat['produits'] = array_keys($cat['produits']);
+            }
+            unset($cat);
+            
+            // Liste des produits pour l'affichage principal (maintenant par catégorie)
+            $categoriesVille = array_keys($parCategorie);
             
             $totalBesoinsQuantite = 0;
             foreach ($besoinsVille as $besoin) {
@@ -82,7 +123,8 @@ class DashboardController {
                 'totalBesoinsQuantite' => $totalBesoinsQuantite,
                 'quantiteAllouee' => $quantiteAllouee,
                 'quantiteRestante' => $quantiteRestante,
-                'produits' => $produitsVille,
+                'produits' => $categoriesVille,
+                'parCategorie' => array_values($parCategorie),
                 'etat' => $etat,
                 'pourcentage' => $pourcentage,
                 'oldestBesoinDate' => $oldestBesoinDate

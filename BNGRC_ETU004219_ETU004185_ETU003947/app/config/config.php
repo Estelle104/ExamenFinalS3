@@ -26,20 +26,13 @@ if (empty($app) === true) {
 // You'll need to namespace your classes with "app\folder\" to include them properly
 $app->path(__DIR__ . $ds . '..' . $ds . '..');
 
-// Core config variables
-// define('BASE_URL', '/ETU004185/livraisonNoelS3');
 if (!defined('BASE_URL')) {
     define(
         'BASE_URL',
-        '/ExamenFinalS3/ProjetFinal'
+        '/ETU004185/BNGRC_ETU004219_ETU004185_ETU003947'
 
     );
 }
-
-// define(
-//     'BASE_URL',
-//     '/ETU004219/livraisonNoelS3'
-// );
 
 $app->set('flight.base_url', BASE_URL);           // Base URL for your app. Change if app is in a subdirectory (e.g., '/myapp/')
 $app->set('flight.case_sensitive', false);    // Set true for case sensitive routes. Default: false
@@ -54,29 +47,13 @@ if (!$app->get('csp_nonce')) {
 	$app->set('csp_nonce', bin2hex(random_bytes(16)));
 }
 
-return [
-	'database' => [
-		// MySQL Example:
-		'host'     => 'localhost',      // Database host (e.g., 'localhost', 'db.example.com')
-		'dbname'   => 'bngrc_final_s3',   // Database name (e.g., 'flightphp')
-		'user'     => 'root',  // Database user (e.g., 'root')
-		'password' => '',  // Database password (never commit real passwords)
-
-		
-		// SQLite Example:
-		// 'file_path' => __DIR__ . $ds . '..' . $ds . 'database.sqlite', // Path to SQLite file
-	],
-
-];
-
 // return [
 // 	'database' => [
 // 		// MySQL Example:
-// 		'host'     => 'localhost',  
-// 		// 'port'	   => '3306',    // Database host (e.g., 'localhost', 'db.example.com')
-// 		'dbname'   => 'db_s2_ETU004219',   // Database name (e.g., 'flightphp')
-// 		'user'     => 'ETU004219',  // Database user (e.g., 'root')
-// 		'password' => '0PtxTqR3',  // Database password (never commit real passwords)
+// 		'host'     => 'localhost',      // Database host (e.g., 'localhost', 'db.example.com')
+// 		'dbname'   => 'bngrc_final_s3',   // Database name (e.g., 'flightphp')
+// 		'user'     => 'root',  // Database user (e.g., 'root')
+// 		'password' => '',  // Database password (never commit real passwords)
 
 		
 // 		// SQLite Example:
@@ -84,3 +61,19 @@ return [
 // 	],
 
 // ];
+
+return [
+	'database' => [
+		// MySQL Example:
+		'host'     => 'localhost',  
+		// 'port'	   => '3306',    // Database host (e.g., 'localhost', 'db.example.com')
+		'dbname'   => 'db_s2_ETU004185',   // Database name (e.g., 'flightphp')
+		'user'     => 'ETU004185',  // Database user (e.g., 'root')
+		'password' => 'aDivEtrZ',  // Database password (never commit real passwords)
+
+		
+		// SQLite Example:
+		// 'file_path' => __DIR__ . $ds . '..' . $ds . 'database.sqlite', // Path to SQLite file
+	],
+
+];

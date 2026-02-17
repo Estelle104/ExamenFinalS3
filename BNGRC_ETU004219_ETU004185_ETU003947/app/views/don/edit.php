@@ -11,12 +11,15 @@ $regionModel = new Region();
 $villes = $villeModel->getAllVilles();
 $produits = $produitModel->getAllProduits();
 $regions = $regionModel->getAllRegions();
+
+// Récupérer le don passé par le contrôleur
+$don = Flight::get('don') ?? $don ?? [];
 ?>
 
 <section id="reservation">
     <div class="reservation">
         <div class="reservation-left">
-            <h2>Ajouter un Don</h2>
+            <h2>Modifier le Don #<?php echo htmlspecialchars((string)($don['id'] ?? '')); ?></h2>
             
             <?php if (isset($_SESSION['error'])): ?>
                 <div class="alert alert-danger" style="margin-bottom: 20px;">
@@ -32,10 +35,12 @@ $regions = $regionModel->getAllRegions();
                 </div>
             <?php endif; ?>
 
-            <form class="loginAdmin-form" action="<?php echo Flight::get('flight.base_url'); ?>/dons/add" method="POST">
+            <form class="loginAdmin-form" action="<?php echo Flight::get('flight.base_url'); ?>/dons/edit/<?php echo $don['id']; ?>" method="POST">
                 <div class="form-group">
                     <label for="description">Description</label>
-                    <input type="text" id="description" name="description" required placeholder="Ex: Don de riz ONG locale">
+                    <input type="text" id="description" name="description" required 
+                           value="<?php echo htmlspecialchars($don['description'] ?? ''); ?>"
+                           placeholder="Ex: Don de riz ONG locale">
                 </div>
 
                 <div class="form-group">
@@ -43,7 +48,8 @@ $regions = $regionModel->getAllRegions();
                     <select id="id_produit" name="id_produit" required>
                         <option value="">Sélectionner un produit</option>
                         <?php foreach ($produits as $produit): ?>
-                            <option value="<?php echo $produit['id']; ?>">
+                            <option value="<?php echo $produit['id']; ?>" 
+                                    <?php echo ($don['id_produit'] ?? '') == $produit['id'] ? 'selected' : ''; ?>>
                                 <?php echo htmlspecialchars($produit['nom']); ?>
                             </option>
                         <?php endforeach; ?>
@@ -55,7 +61,8 @@ $regions = $regionModel->getAllRegions();
                     <select id="id_region" name="id_region">
                         <option value="">Sélectionner une région</option>
                         <?php foreach ($regions as $region): ?>
-                            <option value="<?php echo $region['id']; ?>">
+                            <option value="<?php echo $region['id']; ?>"
+                                    <?php echo ($don['id_region'] ?? '') == $region['id'] ? 'selected' : ''; ?>>
                                 <?php echo htmlspecialchars($region['nom']); ?>
                             </option>
                         <?php endforeach; ?>
@@ -68,7 +75,8 @@ $regions = $regionModel->getAllRegions();
                     <select id="id_ville" name="id_ville">
                         <option value="">Sélectionner une ville</option>
                         <?php foreach ($villes as $ville): ?>
-                            <option value="<?php echo $ville['id']; ?>">
+                            <option value="<?php echo $ville['id']; ?>"
+                                    <?php echo ($don['id_ville'] ?? '') == $ville['id'] ? 'selected' : ''; ?>>
                                 <?php echo htmlspecialchars($ville['nom']); ?>
                             </option>
                         <?php endforeach; ?>
@@ -78,16 +86,26 @@ $regions = $regionModel->getAllRegions();
 
                 <div class="form-group">
                     <label for="quantite">Quantité</label>
-                    <input type="number" id="quantite" name="quantite" required placeholder="Ex: 300" min="1">
+                    <input type="number" id="quantite" name="quantite" required 
+                           value="<?php echo htmlspecialchars((string)($don['quantite'] ?? '')); ?>"
+                           placeholder="Ex: 300" min="1">
+                </div>
+
+                <div class="form-group">
+                    <label for="date_don">Date du don</label>
+                    <input type="date" id="date_don" name="date_don" 
+                           value="<?php echo htmlspecialchars($don['date_don'] ?? ''); ?>">
                 </div>
 
                 <div class="form-group">
                     <label for="donneur">Donneur</label>
-                    <input type="text" id="donneur" name="donneur" required placeholder="Ex: ONG Fanantenana">
+                    <input type="text" id="donneur" name="donneur" required 
+                           value="<?php echo htmlspecialchars($don['donneur'] ?? ''); ?>"
+                           placeholder="Ex: ONG Fanantenana">
                 </div>
 
-                <button type="submit" class="submit-btn-loginAdmin">Ajouter</button>
-                <a href="<?php echo Flight::get('flight.base_url'); ?>/dons" style="text-align: center; display: block; margin-top: 1rem; text-decoration: none; color: #666;">Retour</a>
+                <button type="submit" class="submit-btn-loginAdmin">💾 Enregistrer les modifications</button>
+                <a href="<?php echo Flight::get('flight.base_url'); ?>/dons" style="text-align: center; display: block; margin-top: 1rem; text-decoration: none; color: #666;">← Retour à la liste</a>
             </form>
         </div>
         <div class="reservation-right">
@@ -159,57 +177,5 @@ $regions = $regionModel->getAllRegions();
     .form-group input:hover,
     .form-group select:hover {
         border-color: #1e3a8a;
-    }
-    /* Feedback interactif */
-    #achat-feedback {
-        font-size: 1rem;
-        background: #f8fafc;
-        border: 1px solid #e2e8f0;
-        border-radius: 5px;
-        padding: 0.75rem 1rem;
-        min-height: 30px;
-        color: #1e3a8a;
-        border-left: 4px solid #fbbf24;
-    }
-    
-    /* Style supplémentaire pour cohérence */
-    .form-group.required label::after {
-        content: " *";
-        color: #f59e0b;
-        font-weight: bold;
-    }
-    
-    .btn-submit {
-        background: #1e3a8a;
-        color: white;
-        padding: 0.75rem 1.5rem;
-        border: none;
-        border-radius: 5px;
-        font-size: 1rem;
-        font-weight: 600;
-        cursor: pointer;
-        transition: all 0.3s ease;
-    }
-    
-    .btn-submit:hover {
-        background: #2d4ec0;
-        transform: translateY(-2px);
-        box-shadow: 0 4px 12px rgba(30, 58, 138, 0.2);
-    }
-    
-    .btn-submit:active {
-        transform: translateY(0);
-    }
-    
-    .hint-text {
-        font-size: 0.875rem;
-        color: #64748b;
-        margin-top: 0.25rem;
-        display: block;
-    }
-    
-    .hint-text i {
-        color: #f59e0b;
-        margin-right: 0.25rem;
     }
 </style>

@@ -41,7 +41,7 @@ class UserController {
             Flight::render('modele.php', [
                 'contentPage' => 'admin/loginAdmin',
                 'currentPage' => 'admin/loginAdmin',
-                'pageTitle' => 'Login Admin - Takalo-Takalo'
+                'pageTitle' => 'Login Admin - BNGRC'
             ]);
             return;
         }

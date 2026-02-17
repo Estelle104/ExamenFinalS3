@@ -28,6 +28,10 @@
                     </thead>
                     <tbody>
                         <?php foreach ($dons as $don): ?>
+                            <?php 
+                            $isArgent = (strtolower($don['produit_nom'] ?? '') === 'argent') || 
+                                        (stripos($don['produit_nom'] ?? '', 'financ') !== false);
+                            ?>
                             <tr>
                                 <td><?php echo htmlspecialchars((string)$don['id']); ?></td>
                                 <td><?php echo htmlspecialchars($don['description']); ?></td>
@@ -36,8 +40,18 @@
                                 <td><?php echo htmlspecialchars((string)$don['quantite']); ?></td>
                                 <td><?php echo htmlspecialchars($don['donneur']); ?></td>
                                 <td><?php echo htmlspecialchars($don['date_don'] ?? 'N/A'); ?></td>
-                                <td>
-                                    <a href="<?php echo Flight::get('flight.base_url'); ?>/dashboard" class="btn-view">Voir</a>
+                                <td class="actions-cell">
+                                    <a href="<?php echo Flight::get('flight.base_url'); ?>/dons/edit/<?php echo $don['id']; ?>" class="btn-action btn-edit" title="Modifier">
+                                        ✏️
+                                    </a>
+                                    <a href="<?php echo Flight::get('flight.base_url'); ?>/dons/delete/<?php echo $don['id']; ?>" class="btn-action btn-delete" title="Supprimer" onclick="return confirm('Êtes-vous sûr de vouloir supprimer ce don ?');">
+                                        🗑️
+                                    </a>
+                                    <?php if ($isArgent): ?>
+                                    <a href="<?php echo Flight::get('flight.base_url'); ?>/achat/add" class="btn-action btn-achat" title="Faire un achat">
+                                        🛒
+                                    </a>
+                                    <?php endif; ?>
                                 </td>
                             </tr>
                         <?php endforeach; ?>
@@ -213,24 +227,60 @@
     }
 
     /* Variante de bouton pour actions secondaires */
-    .btn-edit {
-        background: transparent;
-        color: #1e3a8a;
-        padding: 0.5rem 1.2rem;
-        border-radius: 6px;
+    /* Styles pour les boutons d'action */
+    .actions-cell {
+        white-space: nowrap;
+    }
+
+    .btn-action {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 36px;
+        height: 36px;
+        border-radius: 8px;
         text-decoration: none;
-        font-size: 0.9rem;
-        font-weight: 600;
+        font-size: 1.1rem;
         transition: all 0.3s ease;
-        display: inline-block;
-        border: 2px solid #1e3a8a;
-        margin-right: 0.5rem;
+        margin-right: 0.3rem;
+        border: 2px solid transparent;
+    }
+
+    .btn-action:last-child {
+        margin-right: 0;
+    }
+
+    .btn-edit {
+        background: #e0f2fe;
+        border-color: #0284c7;
     }
 
     .btn-edit:hover {
-        background: #1e3a8a;
-        color: white;
+        background: #0284c7;
         transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(2, 132, 199, 0.3);
+    }
+
+    .btn-delete {
+        background: #fee2e2;
+        border-color: #dc2626;
+    }
+
+    .btn-delete:hover {
+        background: #dc2626;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(220, 38, 38, 0.3);
+    }
+
+    .btn-achat {
+        background: #dcfce7;
+        border-color: #16a34a;
+    }
+
+    .btn-achat:hover {
+        background: #16a34a;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(22, 163, 74, 0.3);
     }
 
     .no-data {

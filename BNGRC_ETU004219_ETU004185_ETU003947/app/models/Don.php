@@ -10,7 +10,6 @@ class Don extends Db
 
     /**
      * Ajoute un don.
-     * @return int Identifiant du don créé.
      */
     public function addDon(
         string $description,
@@ -30,7 +29,6 @@ class Don extends Db
 
     /**
      * Récupère tous les dons avec le nom du produit et de la ville.
-     * @return array Liste des dons.
      */
     public function getAllDons(): array
     {
@@ -43,8 +41,56 @@ class Don extends Db
     }
 
     /**
+     * Récupère un don par son ID.
+     */
+    public function getDonById(int $id): ?array
+    {
+        $sql = "SELECT d.*, p.nom AS produit_nom, v.nom AS ville_nom, r.nom AS region_nom
+                FROM {$this->table} d
+                LEFT JOIN produits p ON p.id = d.id_produit
+                LEFT JOIN villes v ON v.id = d.id_ville
+                LEFT JOIN regions r ON r.id = d.id_region
+                WHERE d.id = ?";
+        $result = $this->execute($sql, [$id])->fetch(PDO::FETCH_ASSOC);
+        return $result ?: null;
+    }
+
+    /**
+     * Met à jour un don.
+     */
+    public function updateDon(
+        int $id,
+        string $description,
+        int $idProduit,
+        ?int $idVille,
+        int $quantite,
+        ?string $dateDon,
+        string $donneur,
+        ?int $idRegion = null
+    ): bool {
+        $dateDon = $dateDon ?: date('Y-m-d');
+        $sql = "UPDATE {$this->table} 
+                SET description = ?, id_produit = ?, id_ville = ?, id_region = ?, quantite = ?, date_don = ?, donneur = ?
+                WHERE id = ?";
+        $this->execute($sql, [$description, $idProduit, $idVille, $idRegion, $quantite, $dateDon, $donneur, $id]);
+        return true;
+    }
+
+    /**
+     * Supprime un don.
+     */
+    public function deleteDon(int $id): bool
+    {
+        // Supprimer d'abord les dispatch liés
+        $this->execute("DELETE FROM dispatch WHERE id_don = ?", [$id]);
+        // Puis supprimer le don
+        $sql = "DELETE FROM {$this->table} WHERE id = ?";
+        $this->execute($sql, [$id]);
+        return true;
+    }
+
+    /**
      * Simule l'attribution des dons aux besoins compatibles.
-     * @return array Résumé (dispatch_crees, dons_traite).
      */
     /**
      * Prévisualise la simulation sans modifier la BDD
@@ -338,12 +384,12 @@ class Don extends Db
         $details = [];
         
         // Calculer la quantité totale de dons disponibles pour ce produit
-        $totalDonsDisponibles = $this->execute(
+        $totalDonsDisponibles = (int) ($this->execute(
             "SELECT SUM(d.quantite - COALESCE((SELECT SUM(quantite_attribuee) FROM dispatch WHERE id_don = d.id), 0)) AS total
              FROM dons d 
              WHERE d.id_produit = ?",
             [$idProduit]
-        )->fetch(PDO::FETCH_ASSOC)['total'] ?? 0;
+        )->fetch(PDO::FETCH_ASSOC)['total'] ?? 0);
 
         if ($totalDonsDisponibles <= 0) return $details;
 
@@ -361,6 +407,69 @@ class Don extends Db
         $totalBesoins = array_sum(array_column($besoinsParVille, 'total_restant'));
         if ($totalBesoins <= 0) return $details;
 
+        // ÉTAPE 1: Calculer les allocations proportionnelles avec parties décimales
+        $allocations = [];
+        $sommeArrondis = 0;
+        
+        foreach ($besoinsParVille as $index => $villeData) {
+            $proportion = $villeData['total_restant'] / $totalBesoins;
+            $allocationExacte = $totalDonsDisponibles * $proportion;
+            $partieEntiere = (int) floor($allocationExacte);
+            $partieDecimale = $allocationExacte - $partieEntiere;
+            
+            $allocations[$index] = [
+                'id_ville' => $villeData['id_ville'],
+                'ville_nom' => $villeData['ville_nom'],
+                'total_restant' => $villeData['total_restant'],
+                'allocation_exacte' => $allocationExacte,
+                'allocation_arrondie' => $partieEntiere,
+                'partie_decimale' => $partieDecimale
+            ];
+            
+            $sommeArrondis += $partieEntiere;
+        }
+        
+        // ÉTAPE 2: Calculer le reste à distribuer
+        $reste = $totalDonsDisponibles - $sommeArrondis;
+        
+        // ÉTAPE 3: Distribuer le reste selon la partie décimale (plus grande d'abord)
+        if ($reste > 0) {
+            // Trier par partie décimale décroissante
+            usort($allocations, function($a, $b) {
+                return $b['partie_decimale'] <=> $a['partie_decimale'];
+            });
+            
+            // Distribuer le reste en boucle
+            $indexAlloc = 0;
+            $nbAllocations = count($allocations);
+            
+            while ($reste > 0 && $nbAllocations > 0) {
+                // Vérifier qu'on ne dépasse pas le besoin de cette ville
+                $villeAlloc = &$allocations[$indexAlloc];
+                $maxPossible = $villeAlloc['total_restant'] - $villeAlloc['allocation_arrondie'];
+                
+                if ($maxPossible > 0) {
+                    $villeAlloc['allocation_arrondie']++;
+                    $reste--;
+                }
+                
+                // Passer à la ville suivante (boucle circulaire)
+                $indexAlloc = ($indexAlloc + 1) % $nbAllocations;
+                
+                // Si on a fait un tour complet sans pouvoir distribuer, sortir
+                if ($indexAlloc === 0) {
+                    $peutEncoreDistribuer = false;
+                    foreach ($allocations as $alloc) {
+                        if ($alloc['total_restant'] > $alloc['allocation_arrondie']) {
+                            $peutEncoreDistribuer = true;
+                            break;
+                        }
+                    }
+                    if (!$peutEncoreDistribuer) break;
+                }
+            }
+        }
+
         // Récupérer les dons disponibles
         $dons = $this->execute(
             "SELECT d.*, 
@@ -372,10 +481,9 @@ class Don extends Db
             [$idProduit]
         )->fetchAll(PDO::FETCH_ASSOC);
 
-        // Calculer la proportion pour chaque ville
-        foreach ($besoinsParVille as $villeData) {
-            $proportion = $villeData['total_restant'] / $totalBesoins;
-            $quantiteAllouee = (int) floor($totalDonsDisponibles * $proportion);
+        // ÉTAPE 4: Appliquer les allocations finales
+        foreach ($allocations as $villeAlloc) {
+            $quantiteAllouee = $villeAlloc['allocation_arrondie'];
             
             if ($quantiteAllouee <= 0) continue;
 
@@ -384,7 +492,7 @@ class Don extends Db
                 "SELECT * FROM besoins 
                  WHERE id_produit = ? AND id_ville = ? AND quantite_restante > 0
                  ORDER BY date_besoin ASC, id ASC",
-                [$idProduit, $villeData['id_ville']]
+                [$idProduit, $villeAlloc['id_ville']]
             )->fetchAll(PDO::FETCH_ASSOC);
 
             $remainingAlloue = $quantiteAllouee;
@@ -407,7 +515,7 @@ class Don extends Db
                         'id_don' => $don['id'],
                         'id_besoin' => $besoin['id'],
                         'quantite' => $quantite,
-                        'ville_nom' => $villeData['ville_nom'] ?? 'Inconnue'
+                        'ville_nom' => $villeAlloc['ville_nom'] ?? 'Inconnue'
                     ];
 
                     $remainingDon -= $quantite;
@@ -651,9 +759,7 @@ class Don extends Db
         }
     }
 
-    /**
-     * Applique un achat aux besoins (plus anciens d'abord) avec la même connexion.
-     */
+    
     private function applyAchatToBesoinsSameConnection(int $idProduit, ?int $idVille, int $quantite): void
     {
         $sql = "SELECT * FROM besoins WHERE id_produit = ? AND COALESCE(quantite_restante, quantite) > 0 ";
