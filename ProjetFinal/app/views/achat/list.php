@@ -5,6 +5,72 @@
             <a href="<?php echo Flight::get('flight.base_url'); ?>/achat/add" class="btn-add">Ajouter un achat</a>
         </div>
 
+        <!-- Filtres -->
+        <div class="filter-section">
+            <div class="filter-header">
+                <h3>Filtrer les achats</h3>
+                <button type="button" id="toggle-filters" class="toggle-filters">Afficher/Masquer filtres</button>
+            </div>
+            
+            <div class="filter-content" id="filter-content">
+                <div class="filter-group">
+                    <label for="filter-ville">Ville:</label>
+                    <select id="filter-ville" class="filter-select">
+                        <option value="">-- Tous --</option>
+                        <?php foreach ($villes as $ville): ?>
+                            <option value="<?php echo htmlspecialchars($ville['nom']); ?>">
+                                <?php echo htmlspecialchars($ville['nom']); ?>
+                            </option>
+                        <?php endforeach; ?>
+                    </select>
+                </div>
+
+                <div class="filter-group">
+                    <label for="filter-produit">Produit:</label>
+                    <select id="filter-produit" class="filter-select">
+                        <option value="">-- Tous --</option>
+                        <?php foreach ($produits as $produit): ?>
+                            <option value="<?php echo htmlspecialchars($produit['nom']); ?>">
+                                <?php echo htmlspecialchars($produit['nom']); ?>
+                            </option>
+                        <?php endforeach; ?>
+                    </select>
+                </div>
+
+                <div class="filter-group">
+                    <label for="filter-date">Date d'achat:</label>
+                    <input type="date" id="filter-date" class="filter-input">
+                </div>
+
+                <div class="filter-group">
+                    <label for="filter-montant-min">Montant minimum:</label>
+                    <input type="number" id="filter-montant-min" class="filter-input" placeholder="0" min="0">
+                </div>
+
+                <div class="filter-group">
+                    <label for="filter-montant-max">Montant maximum:</label>
+                    <input type="number" id="filter-montant-max" class="filter-input" placeholder="0" min="0">
+                </div>
+
+                <div class="filter-group">
+                    <label for="filter-quantite-min">Quantité minimum:</label>
+                    <input type="number" id="filter-quantite-min" class="filter-input" placeholder="0" min="0">
+                </div>
+
+                <div class="filter-group">
+                    <label for="filter-quantite-max">Quantité maximum:</label>
+                    <input type="number" id="filter-quantite-max" class="filter-input" placeholder="0" min="0">
+                </div>
+
+                <div class="filter-actions">
+                    <button type="button" id="apply-filters" class="btn-filter">Appliquer filtres</button>
+                    <button type="button" id="reset-filters" class="btn-reset">Réinitialiser</button>
+                </div>
+            </div>
+        </div>
+
+        <div id="filter-result" class="filter-result"></div>
+
         <div class="list-content">
             <?php if (!empty($achats)): ?>
                 <table class="list-table">
@@ -332,4 +398,127 @@
     .filter-btn:hover {
         background: #2d4ec0;
     }
+
 </style>
+
+<link rel="stylesheet" href="<?php echo Flight::get('flight.base_url'); ?>/public/css/filters.css">
+
+<script nonce="<?php echo Flight::get('csp_nonce'); ?>">
+document.addEventListener('DOMContentLoaded', function() {
+    const filterContent = document.getElementById('filter-content');
+    const toggleFiltersBtn = document.getElementById('toggle-filters');
+    const applyFiltersBtn = document.getElementById('apply-filters');
+    const resetFiltersBtn = document.getElementById('reset-filters');
+    const filterVilleSelect = document.getElementById('filter-ville');
+    const filterProduitSelect = document.getElementById('filter-produit');
+    const filterDateInput = document.getElementById('filter-date');
+    const filterMontantMinInput = document.getElementById('filter-montant-min');
+    const filterMontantMaxInput = document.getElementById('filter-montant-max');
+    const filterQuantiteMinInput = document.getElementById('filter-quantite-min');
+    const filterQuantiteMaxInput = document.getElementById('filter-quantite-max');
+
+    // Toggle filters visibility
+    if (toggleFiltersBtn) {
+        toggleFiltersBtn.addEventListener('click', function() {
+            filterContent.classList.toggle('hidden');
+        });
+    }
+
+    // Apply filters
+    if (applyFiltersBtn) {
+        applyFiltersBtn.addEventListener('click', filterTable);
+    }
+
+    // Reset filters
+    if (resetFiltersBtn) {
+        resetFiltersBtn.addEventListener('click', function() {
+            filterVilleSelect.value = '';
+            filterProduitSelect.value = '';
+            filterDateInput.value = '';
+            filterMontantMinInput.value = '';
+            filterMontantMaxInput.value = '';
+            filterQuantiteMinInput.value = '';
+            filterQuantiteMaxInput.value = '';
+            filterTable();
+        });
+    }
+
+    function filterTable() {
+        const table = document.querySelector('.list-table');
+        if (!table) return;
+
+        const rows = table.querySelectorAll('tbody tr');
+        const villeFilter = filterVilleSelect.value.toLowerCase();
+        const produitFilter = filterProduitSelect.value.toLowerCase();
+        const dateFilter = filterDateInput.value;
+        const montantMin = parseFloat(filterMontantMinInput.value) || 0;
+        const montantMax = parseFloat(filterMontantMaxInput.value) || Infinity;
+        const quantiteMin = parseFloat(filterQuantiteMinInput.value) || 0;
+        const quantiteMax = parseFloat(filterQuantiteMaxInput.value) || Infinity;
+
+        let visibleCount = 0;
+        let totalRows = 0;
+
+        rows.forEach(row => {
+            totalRows++;
+            const cells = row.querySelectorAll('td');
+            
+            const produit = cells[1]?.textContent.toLowerCase() || '';
+            const ville = cells[2]?.textContent.toLowerCase() || '';
+            const quantite = parseFloat(cells[3]?.textContent) || 0;
+            const montant = parseFloat(cells[4]?.textContent) || 0;
+            const date = cells[5]?.textContent || '';
+
+            let showRow = true;
+
+            // Appliquer les filtres
+            if (villeFilter && !ville.includes(villeFilter)) {
+                showRow = false;
+            }
+            if (produitFilter && !produit.includes(produitFilter)) {
+                showRow = false;
+            }
+            if (dateFilter && !date.includes(dateFilter)) {
+                showRow = false;
+            }
+            if (montantMin > 0 && montant < montantMin) {
+                showRow = false;
+            }
+            if (montantMax < Infinity && montant > montantMax) {
+                showRow = false;
+            }
+            if (quantiteMin > 0 && quantite < quantiteMin) {
+                showRow = false;
+            }
+            if (quantiteMax < Infinity && quantite > quantiteMax) {
+                showRow = false;
+            }
+
+            row.style.display = showRow ? '' : 'none';
+            if (showRow) visibleCount++;
+        });
+
+        // Afficher le nombre de résultats
+        const resultDiv = document.getElementById('filter-result');
+        if (resultDiv) {
+            if (visibleCount === 0) {
+                resultDiv.innerHTML = '<p style="color: #ef4444; font-weight: bold;">Aucun résultat ne correspond aux filtres.</p>';
+            } else if (visibleCount < totalRows) {
+                resultDiv.innerHTML = `<p>Affichage de <strong>${visibleCount}</strong> achat(s) sur <strong>${totalRows}</strong></p>`;
+            } else {
+                resultDiv.innerHTML = '';
+            }
+        }
+    }
+
+    // Appliquer les filtres au changement de valeur (optionnel pour l'UX)
+    [filterVilleSelect, filterProduitSelect, filterDateInput, filterMontantMinInput, filterMontantMaxInput, filterQuantiteMinInput, filterQuantiteMaxInput].forEach(element => {
+        if (element) {
+            element.addEventListener('change', function() {
+                // Optionnel: décommenter pour filtrer automatiquement
+                // filterTable();
+            });
+        }
+    });
+});
+</script>

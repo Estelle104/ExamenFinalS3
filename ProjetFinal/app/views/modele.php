@@ -53,6 +53,7 @@ $contentPath = __DIR__ . '/' . $contentPage . '.php';
     <title><?php echo htmlspecialchars($pageTitle); ?></title>
     <link rel="stylesheet" href="<?php echo Flight::get('flight.base_url'); ?>/public/css/tooplate-bistro-elegance.css">
     <link rel="stylesheet" href="<?php echo Flight::get('flight.base_url'); ?>/public/css/style.css">
+    <link rel="stylesheet" href="<?php echo Flight::get('flight.base_url'); ?>/public/css/filters.css">
     <!-- <link rel="stylesheet" href="/css/tooplate-bistro-elegance.css">
     <link rel="stylesheet" href="/css/style.css"> -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
