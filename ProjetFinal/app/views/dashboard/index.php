@@ -12,6 +12,8 @@
                     <?php unset($_SESSION['success']); ?>
                 </div>
             <?php endif; ?>
+
+           
             
             <!-- Stats Cards -->
             <div class="stats-grid">
@@ -27,6 +29,14 @@
                     <h3><?php echo isset($totalDons) ? $totalDons : 0; ?></h3>
                     <p>Dons</p>
                 </div>
+            </div>
+
+             <div class="dashboard-actions" style="margin-bottom: 20px; margin-top: 50px;">
+                <a href="<?php echo Flight::get('flight.base_url'); ?>/simulate" class="btn-dashboard" style="background: #f59e0b;">Simuler l'allocation</a>
+                <a href="<?php echo Flight::get('flight.base_url'); ?>/dashboard/details" class="btn-dashboard" style="background: #e0e7ff;"> Détails par produit</a>
+                <!-- <a href="<?php echo Flight::get('flight.base_url'); ?>/villes" class="btn-dashboard">Gérer les villes</a>
+                <a href="<?php echo Flight::get('flight.base_url'); ?>/besoins" class="btn-dashboard">Gérer les besoins</a> -->
+                <a href="<?php echo Flight::get('flight.base_url'); ?>/dons" class="btn-dashboard btn-primary">Ajouter un don</a>
             </div>
 
             <!-- Main Table -->
@@ -141,13 +151,7 @@
             </div>
 
             <!-- Action Buttons -->
-            <div class="dashboard-actions">
-                <a href="<?php echo Flight::get('flight.base_url'); ?>/simulate" class="btn-dashboard" style="background: #f59e0b;">Simuler l'allocation</a>
-                <a href="<?php echo Flight::get('flight.base_url'); ?>/dashboard/details" class="btn-dashboard" style="background: #e0e7ff;"> Détails par produit</a>
-                <a href="<?php echo Flight::get('flight.base_url'); ?>/villes" class="btn-dashboard">Gérer les villes</a>
-                <a href="<?php echo Flight::get('flight.base_url'); ?>/besoins" class="btn-dashboard">Gérer les besoins</a>
-                <a href="<?php echo Flight::get('flight.base_url'); ?>/dons" class="btn-dashboard btn-primary">Ajouter un don</a>
-            </div>
+            
         </div>
 
     </div>

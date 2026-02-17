@@ -23,7 +23,25 @@ $baseUrl = Flight::get('flight.base_url');
                 <?php echo htmlspecialchars($_SESSION['success']); unset($_SESSION['success']); ?>
             </div>
         <?php endif; ?>
-
+            <!-- Boutons d'action -->
+        <div style="display: flex; margin-bottom:20px; gap: 1rem; margin-top: 2rem; justify-content: center; flex-wrap: wrap;">
+            <?php if (!empty($strategiesConfirmees)): ?>
+            <a href="<?php echo $baseUrl; ?>/simulate-valider" 
+               id="btn-valider"
+               style="background: #10b981; color: white; padding: 0.75rem 2rem; border: none; border-radius: 6px; text-decoration: none; font-weight: 600; cursor: pointer; transition: all 0.3s ease;">
+                 Valider réellement (<?php echo count($strategiesConfirmees); ?> catégorie(s))
+            </a>
+            <?php else: ?>
+            <span style="background: #9ca3af; color: white; padding: 0.75rem 2rem; border-radius: 6px; font-weight: 600; cursor: not-allowed;">
+                 Valider (sélectionnez des stratégies)
+            </span>
+            <?php endif; ?>
+            
+            <a href="<?php echo $baseUrl; ?>/simulate-annuler" 
+               style="background: #ef4444; color: white; padding: 0.75rem 2rem; border: none; border-radius: 6px; text-decoration: none; font-weight: 600; cursor: pointer; transition: all 0.3s ease;">
+                Annuler
+            </a>
+        </div>
         <!-- Section: Dons par catégorie -->
         <?php if (!empty($categories)): ?>
         <div style="background: #fff7ed; border: 2px solid #f97316; border-radius: 8px; padding: 1.5rem; margin-bottom: 2rem;">
@@ -141,25 +159,7 @@ $baseUrl = Flight::get('flight.base_url');
         </div>
         <?php endif; ?>
 
-        <!-- Boutons d'action -->
-        <div style="display: flex; gap: 1rem; margin-top: 2rem; justify-content: center; flex-wrap: wrap;">
-            <?php if (!empty($strategiesConfirmees)): ?>
-            <a href="<?php echo $baseUrl; ?>/simulate-valider" 
-               id="btn-valider"
-               style="background: #10b981; color: white; padding: 0.75rem 2rem; border: none; border-radius: 6px; text-decoration: none; font-weight: 600; cursor: pointer; transition: all 0.3s ease;">
-                 Valider réellement (<?php echo count($strategiesConfirmees); ?> catégorie(s))
-            </a>
-            <?php else: ?>
-            <span style="background: #9ca3af; color: white; padding: 0.75rem 2rem; border-radius: 6px; font-weight: 600; cursor: not-allowed;">
-                 Valider (sélectionnez des stratégies)
-            </span>
-            <?php endif; ?>
-            
-            <a href="<?php echo $baseUrl; ?>/simulate-annuler" 
-               style="background: #ef4444; color: white; padding: 0.75rem 2rem; border: none; border-radius: 6px; text-decoration: none; font-weight: 600; cursor: pointer; transition: all 0.3s ease;">
-                Annuler
-            </a>
-        </div>
+        
 
         <div style="text-align: center; margin-top: 2rem;">
             <a href="<?php echo $baseUrl; ?>/dashboard" style="color: #1e3a8a; text-decoration: none; font-weight: 600;">
