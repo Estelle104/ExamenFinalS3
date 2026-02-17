@@ -9,7 +9,12 @@ class VilleController {
     public function list() {
         $villeModel = new Ville();
         $villes = $villeModel->getAllVilles();
-        Flight::render('ville/list.php', ['villes' => $villes]);
+        Flight::render('modele.php', [
+            'contentPage' => 'ville/list',
+            'currentPage' => 'ville',
+            'pageTitle' => 'Liste des villes - BNGRC',
+            'villes' => $villes
+        ]);
     }
 
     public function add() {
@@ -29,6 +34,16 @@ class VilleController {
             }
         }
 
-        Flight::render('ville/add.php');
+        Flight::render('modele.php', [
+            'contentPage' => 'ville/add',
+            'currentPage' => 'ville',
+            'pageTitle' => 'Ajouter une ville - BNGRC'
+        ]);
     }
+
+    public function getAllVilles() {
+        $villeModel = new Ville();
+        return $villeModel->getAllVilles();
+    }
+    
 }

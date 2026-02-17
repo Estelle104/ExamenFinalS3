@@ -30,4 +30,11 @@ class Ville extends Db
                 ORDER BY v.nom ASC";
         return $this->execute($sql)->fetchAll(PDO::FETCH_ASSOC);
     }
+
+    public function getVilleById(int $id): ?array
+    {
+        $sql = "SELECT * FROM {$this->table} WHERE id = ?";
+        $row = $this->execute($sql, [$id])->fetch(PDO::FETCH_ASSOC);
+        return $row ?: null;
+    }
 }

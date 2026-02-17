@@ -1,15 +1,6 @@
 <?php
-
-// use app\controllers\Ville;
-use app\controllers\ProduitController;
-use app\controllers\VilleController;
-
-$villeController = new VilleController();
-$produitController = new ProduitController();
-
-$villes = $villeController->getAllVilles();
-$produits = $produitController->getAllProduits();
-// $regions = $regionModel->getAllRegions();
+$produits = $produits ?? [];
+$villes = $villes ?? [];
 ?>
 
 
@@ -32,39 +23,13 @@ $produits = $produitController->getAllProduits();
                 </div>
             <?php endif; ?>
 
-            <form class="loginAdmin-form" action="<?php echo Flight::get('flight.base_url'); ?>/besoins/add" method="POST">
+            <form class="loginAdmin-form" data-base-url="<?php echo Flight::get('flight.base_url'); ?>" action="<?php echo Flight::get('flight.base_url'); ?>/achat/add" method="POST" autocomplete="off">
                 <!-- <div class="form-group">
                     <label for="description">Description</label>
                     <input type="text" id="description" name="description" required placeholder="Ex: Besoin de riz">
                 </div> -->
-
-                <div class="form-group">
-                    <label for="id_produit">Produit</label>
-                    <select id="id_produit" name="id_produit" required>
-                        <option value="">Sélectionner un produit</option>
-                        <?php foreach ($produits as $produit): ?>
-                            <option value="<?php echo $produit['id']; ?>">
-                                <?php echo htmlspecialchars($produit['nom']); ?>
-                            </option>
-                        <?php endforeach; ?>
-                    </select>
-                </div>
-
-                <!-- <div class="form-group">
-                    <label for="id_region">Région <span style="color: #999; font-size: 0.9rem;">(optionnel)</span></label>
-                    <select id="id_region" name="id_region">
-                        <option value="">Sélectionner une région</option>
-                        <?php foreach ($regions as $region): ?>
-                            <option value="<?php echo $region['id']; ?>">
-                                <?php echo htmlspecialchars($region['nom']); ?>
-                            </option>
-                        <?php endforeach; ?>
-                    </select>
-                    <small style="color: #999;">Ou sélectionner une ville ci-dessous</small>
-                </div> -->
-
-                <div class="form-group">
-                    <label for="id_ville">Ville <span style="color: #999; font-size: 0.9rem;">(optionnel)</span></label>
+                 <div class="form-group">
+                    <label for="id_ville">Ville <span style="color: #999; font-size: 0.9rem;"></span></label>
                     <select id="id_ville" name="id_ville">
                         <option value="">Sélectionner une ville</option>
                         <?php foreach ($villes as $ville): ?>
@@ -77,8 +42,33 @@ $produits = $produitController->getAllProduits();
                 </div>
 
                 <div class="form-group">
+                    <label for="id_produit">Produit</label>
+                    <select id="id_produit" name="id_produit" required>
+                        <option value="">Sélectionner un produit</option>
+                        <?php foreach ($produits as $produit): ?>
+                            <option value="<?php echo $produit['id']; ?>">
+                                <?php echo htmlspecialchars($produit['nom']); ?>
+                                (<?php echo (int) ($produit['quantite_restante_totale'] ?? 0); ?> restants)
+                            </option>
+                        <?php endforeach; ?>
+                    </select>
+                </div>
+
+               
+
+               
+
+                <div class="form-group">
                     <label for="quantite">Quantité</label>
                     <input type="number" id="quantite" name="quantite" required placeholder="Ex: 500" min="1">
+                </div>
+                <!-- Feedback interactif -->
+                <div id="achat-feedback" style="margin-bottom: 1rem;"></div>
+
+                <div class="form-group">
+                    <label>Frais d'achat (%)</label>
+                    <input type="text" value="<?php echo htmlspecialchars((string)($tauxActuel ?? 0)); ?>%" disabled>
+                    <small style="color: #999;">Paramétrable dans la configuration des frais d'achat.</small>
                 </div>
 
                 <div class="form-group">
@@ -87,7 +77,7 @@ $produits = $produitController->getAllProduits();
                 </div>
 
                 <button type="submit" class="submit-btn-loginAdmin">Ajouter</button>
-                <a href="<?php echo Flight::get('flight.base_url'); ?>/achats" style="text-align: center; display: block; margin-top: 1rem; text-decoration: none; color: #666;">Retour</a>
+                <!-- <a href="<?php echo Flight::get('flight.base_url'); ?>/achats" style="text-align: center; display: block; margin-top: 1rem; text-decoration: none; color: #666;">Retour</a> -->
             </form>
         </div>
         <div class="reservation-right">
@@ -122,14 +112,14 @@ $produits = $produitController->getAllProduits();
         margin-bottom: 1rem;
     }
     .alert-danger {
-        background: #f8d7da;
-        color: #721c24;
-        border: 1px solid #f5c6cb;
+        background: #fee2e2;
+        color: #991b1b;
+        border: 1px solid #fecaca;
     }
     .alert-success {
-        background: #d4edda;
-        color: #155724;
-        border: 1px solid #c3e6cb;
+        background: #dcfce7;
+        color: #166534;
+        border: 1px solid #bbf7d0;
     }
     .form-group {
         margin-bottom: 1.5rem;
@@ -138,7 +128,7 @@ $produits = $produitController->getAllProduits();
         display: block;
         margin-bottom: 0.5rem;
         font-weight: 600;
-        color: #333;
+        color: #1e3a8a;
     }
     .form-group input,
     .form-group select {
@@ -148,11 +138,69 @@ $produits = $produitController->getAllProduits();
         border-radius: 5px;
         font-size: 1rem;
         font-family: inherit;
+        transition: all 0.3s ease;
     }
     .form-group input:focus,
     .form-group select:focus {
         outline: none;
-        border-color: #e74c3c;
-        box-shadow: 0 0 0 3px rgba(231, 76, 60, 0.1);
+        border-color: #fbbf24;
+        box-shadow: 0 0 0 3px rgba(251, 191, 36, 0.15);
+    }
+    .form-group input:hover,
+    .form-group select:hover {
+        border-color: #1e3a8a;
+    }
+    /* Feedback interactif */
+    #achat-feedback {
+        font-size: 1rem;
+        background: #f8fafc;
+        border: 1px solid #e2e8f0;
+        border-radius: 5px;
+        padding: 0.75rem 1rem;
+        min-height: 30px;
+        color: #1e3a8a;
+        border-left: 4px solid #fbbf24;
+    }
+    
+    /* Style supplémentaire pour cohérence */
+    .form-group.required label::after {
+        content: " *";
+        color: #f59e0b;
+        font-weight: bold;
+    }
+    
+    .btn-submit {
+        background: #1e3a8a;
+        color: white;
+        padding: 0.75rem 1.5rem;
+        border: none;
+        border-radius: 5px;
+        font-size: 1rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+    
+    .btn-submit:hover {
+        background: #2d4ec0;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(30, 58, 138, 0.2);
+    }
+    
+    .btn-submit:active {
+        transform: translateY(0);
+    }
+    
+    .hint-text {
+        font-size: 0.875rem;
+        color: #64748b;
+        margin-top: 0.25rem;
+        display: block;
+    }
+    
+    .hint-text i {
+        color: #f59e0b;
+        margin-right: 0.25rem;
     }
 </style>
+<script nonce="<?php echo Flight::get('csp_nonce'); ?>" src="<?php echo Flight::get('flight.base_url'); ?>/public/js/achat-form.js"></script>

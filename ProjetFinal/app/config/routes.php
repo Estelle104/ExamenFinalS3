@@ -1,3 +1,4 @@
+
 <?php
 
 use app\controllers\UserController;
@@ -6,6 +7,9 @@ use app\controllers\VilleController;
 use app\controllers\BesoinController;
 use app\controllers\DonController;
 use app\controllers\DashboardController;
+use app\controllers\AchatController;
+use app\controllers\ConfFraisAchatController;
+use app\controllers\RecapitulatifController;
 use flight\net\Router;
 use flight\Engine;
 
@@ -50,7 +54,7 @@ $router->group('', function(Router $router) use ($app) {
         Flight::render('modele.php', [
             'contentPage' => 'accueil',
             'currentPage' => 'accueil',
-            'pageTitle' => 'Home - Takalo-Takalo'
+            'pageTitle' => 'Home - BNGRC'
         ]);
     });
    
@@ -73,8 +77,32 @@ $router->group('', function(Router $router) use ($app) {
 
     // Dashboard - l'objectif principal
     $router->get('/dashboard', [DashboardController::class, 'index']);
+    $router->get('/dashboard/details', [DashboardController::class, 'details']);
 
-    // Route de simulation - exécute l'allocation des dons aux besoins
+    // Route de simulation
     $router->get('/simulate', [DashboardController::class, 'simulate']);
+    $router->get('/simulate-preview', [DashboardController::class, 'previewSimulation']);
+    $router->get('/simulate-valider', [DashboardController::class, 'validerSimulation']);
+    $router->get('/simulate-annuler', [DashboardController::class, 'annulerSimulation']);
+    
+    // Routes AJAX pour les stratégies de dispatch
+    $router->post('/api/preview-strategie', [DashboardController::class, 'previewStrategie']);
+    $router->post('/api/confirmer-strategie', [DashboardController::class, 'confirmerStrategie']);
+
+    // Page de récapitulatif AJAX
+    $router->get('/recapitulatif', [RecapitulatifController::class, 'index']);
+    $router->get('/recapitulatif/ajax', [RecapitulatifController::class, 'ajax']);
+
+
+    $router->get('/achat/add', [AchatController::class, 'addAchat']);
+    $router->post('/achat/add', [AchatController::class, 'addAchat']);
+    $router->get('/achat/list', [AchatController::class, 'listAchats']);
+    $router->get('/achat/frais', [ConfFraisAchatController::class, 'edit']);
+    $router->post('/achat/frais', [ConfFraisAchatController::class, 'edit']);
+    // Route AJAX pour feedback interactif
+    $router->get('/achat/recap', [AchatController::class, 'recapAchatAjax']);
+    // Route AJAX pour filtrer les produits par ville
+    $router->get('/achat/produits', [AchatController::class, 'produitsParVilleAjax']);
+
 
 });

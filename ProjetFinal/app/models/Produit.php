@@ -30,4 +30,18 @@ class Produit extends Db
                 ORDER BY p.nom ASC";
         return $this->execute($sql)->fetchAll(PDO::FETCH_ASSOC);
     }
+
+    public function getPrixUnitaire(int $idProduit): ?float
+    {
+        $sql = "SELECT prix_unitaire FROM {$this->table} WHERE id = ?";
+        $row = $this->execute($sql, [$idProduit])->fetch(PDO::FETCH_ASSOC);
+        return $row ? (float) $row['prix_unitaire'] : null;
+    }
+
+    public function getProduitById(int $id): ?array
+    {
+        $sql = "SELECT * FROM {$this->table} WHERE id = ?";
+        $row = $this->execute($sql, [$id])->fetch(PDO::FETCH_ASSOC);
+        return $row ?: null;
+    }
 }

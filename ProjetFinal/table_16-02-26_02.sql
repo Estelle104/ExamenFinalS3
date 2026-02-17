@@ -97,3 +97,9 @@ CREATE TABLE achats (
  date_achat DATE
 );
 
+CREATE TABLE conf_frais_achat (
+ id INT AUTO_INCREMENT PRIMARY KEY,
+ taux_pourcentage DECIMAL(5,2) NOT NULL DEFAULT 0,
+ date_config DATE
+);
+

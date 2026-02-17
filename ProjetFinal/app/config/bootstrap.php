@@ -15,13 +15,15 @@ $app = Flight::app();
 $nonce = bin2hex(random_bytes(16));
 Flight::set('csp_nonce', $nonce);
 
+// CSP permissive pour le développement
 header(
     "Content-Security-Policy: "
     . "default-src 'self'; "
-    . "script-src 'self' 'nonce-$nonce' 'strict-dynamic'; "
-    . "style-src 'self' 'unsafe-inline'; "
+    . "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com; "
+    . "style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com; "
+    . "font-src 'self' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com data:; "
     . "img-src 'self' data:; "
-    . "font-src 'self'; "
+    . "connect-src 'self'; "
 );
 
 /* ============================ */
