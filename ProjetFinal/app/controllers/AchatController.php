@@ -156,13 +156,23 @@ class AchatController
     public function listAchats(){
 
         $achat = new Achat();
+        $villeModel = new Ville();
+        $produitModel = new Produit();
+        
+        // Récupérer tous les achats
         $achats = $achat->getAllAchats();
+        
+        // Récupérer les villes et produits pour les filtres
+        $villes = $villeModel->getAllVilles();
+        $produits = $produitModel->getAllProduits();
 
         Flight::render('modele.php', [
             'contentPage' => 'achat/list',
             'currentPage' => 'achat',
             'pageTitle' => 'Liste des achats - BNGRC',
-            'achats' => $achats
+            'achats' => $achats,
+            'villes' => $villes,
+            'produits' => $produits
         ]);
     }
 
