@@ -9,7 +9,12 @@ class RegionController {
     public function list() {
         $regionModel = new Region();
         $regions = $regionModel->getAllRegions();
-        Flight::render('region/list.php', ['regions' => $regions]);
+        Flight::render('modele.php', [
+            'contentPage' => 'region/list',
+            'currentPage' => 'region',
+            'pageTitle' => 'Liste des régions - BNGRC',
+            'regions' => $regions
+        ]);
     }
 
     public function add() {
@@ -28,6 +33,10 @@ class RegionController {
             }
         }
 
-        Flight::render('region/add.php');
+        Flight::render('modele.php', [
+            'contentPage' => 'region/add',
+            'currentPage' => 'region',
+            'pageTitle' => 'Ajouter une région - BNGRC'
+        ]);
     }
 }

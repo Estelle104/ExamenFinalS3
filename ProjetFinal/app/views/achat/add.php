@@ -1,22 +1,13 @@
 <?php
-
-use app\models\Ville;
-use app\models\Produit;
-use app\models\Region;
-
-$villeModel = new Ville();
-$produitModel = new Produit();
-$regionModel = new Region();
-
-$villes = $villeModel->getAllVilles();
-$produits = $produitModel->getAllProduits();
-$regions = $regionModel->getAllRegions();
+$produits = $produits ?? [];
+$villes = $villes ?? [];
 ?>
+
 
 <section id="reservation">
     <div class="reservation">
         <div class="reservation-left">
-            <h2>Ajouter un Besoin</h2>
+            <h2>Effectuer un Achat</h2>
             
             <?php if (isset($_SESSION['error'])): ?>
                 <div class="alert alert-danger" style="margin-bottom: 20px;">
@@ -32,39 +23,13 @@ $regions = $regionModel->getAllRegions();
                 </div>
             <?php endif; ?>
 
-            <form class="loginAdmin-form" action="<?php echo Flight::get('flight.base_url'); ?>/besoins/add" method="POST">
-                <div class="form-group">
+            <form class="loginAdmin-form" data-base-url="<?php echo Flight::get('flight.base_url'); ?>" action="<?php echo Flight::get('flight.base_url'); ?>/achat/add" method="POST" autocomplete="off">
+                <!-- <div class="form-group">
                     <label for="description">Description</label>
                     <input type="text" id="description" name="description" required placeholder="Ex: Besoin de riz">
-                </div>
-
-                <div class="form-group">
-                    <label for="id_produit">Produit</label>
-                    <select id="id_produit" name="id_produit" required>
-                        <option value="">Sélectionner un produit</option>
-                        <?php foreach ($produits as $produit): ?>
-                            <option value="<?php echo $produit['id']; ?>">
-                                <?php echo htmlspecialchars($produit['nom']); ?>
-                            </option>
-                        <?php endforeach; ?>
-                    </select>
-                </div>
-
-                <div class="form-group">
-                    <label for="id_region">Région <span style="color: #999; font-size: 0.9rem;">(optionnel)</span></label>
-                    <select id="id_region" name="id_region">
-                        <option value="">Sélectionner une région</option>
-                        <?php foreach ($regions as $region): ?>
-                            <option value="<?php echo $region['id']; ?>">
-                                <?php echo htmlspecialchars($region['nom']); ?>
-                            </option>
-                        <?php endforeach; ?>
-                    </select>
-                    <small style="color: #999;">Ou sélectionner une ville ci-dessous</small>
-                </div>
-
-                <div class="form-group">
-                    <label for="id_ville">Ville <span style="color: #999; font-size: 0.9rem;">(optionnel)</span></label>
+                </div> -->
+                 <div class="form-group">
+                    <label for="id_ville">Ville <span style="color: #999; font-size: 0.9rem;"></span></label>
                     <select id="id_ville" name="id_ville">
                         <option value="">Sélectionner une ville</option>
                         <?php foreach ($villes as $ville): ?>
@@ -77,12 +42,42 @@ $regions = $regionModel->getAllRegions();
                 </div>
 
                 <div class="form-group">
+                    <label for="id_produit">Produit</label>
+                    <select id="id_produit" name="id_produit" required>
+                        <option value="">Sélectionner un produit</option>
+                        <?php foreach ($produits as $produit): ?>
+                            <option value="<?php echo $produit['id']; ?>">
+                                <?php echo htmlspecialchars($produit['nom']); ?>
+                                (<?php echo (int) ($produit['quantite_restante_totale'] ?? 0); ?> restants)
+                            </option>
+                        <?php endforeach; ?>
+                    </select>
+                </div>
+
+               
+
+               
+
+                <div class="form-group">
                     <label for="quantite">Quantité</label>
                     <input type="number" id="quantite" name="quantite" required placeholder="Ex: 500" min="1">
                 </div>
+                <!-- Feedback interactif -->
+                <div id="achat-feedback" style="margin-bottom: 1rem;"></div>
+
+                <div class="form-group">
+                    <label>Frais d'achat (%)</label>
+                    <input type="text" value="<?php echo htmlspecialchars((string)($tauxActuel ?? 0)); ?>%" disabled>
+                    <small style="color: #999;">Paramétrable dans la configuration des frais d'achat.</small>
+                </div>
+
+                <div class="form-group">
+                    <label for="date_achat">Date d'Achat</label>
+                    <input type="date" id="date" name="date_achat" required>
+                </div>
 
                 <button type="submit" class="submit-btn-loginAdmin">Ajouter</button>
-                <a href="<?php echo Flight::get('flight.base_url'); ?>/besoins" style="text-align: center; display: block; margin-top: 1rem; text-decoration: none; color: #666;">Retour</a>
+                <!-- <a href="<?php echo Flight::get('flight.base_url'); ?>/achats" style="text-align: center; display: block; margin-top: 1rem; text-decoration: none; color: #666;">Retour</a> -->
             </form>
         </div>
         <div class="reservation-right">
@@ -208,4 +203,4 @@ $regions = $regionModel->getAllRegions();
         margin-right: 0.25rem;
     }
 </style>
-
+<script nonce="<?php echo Flight::get('csp_nonce'); ?>" src="<?php echo Flight::get('flight.base_url'); ?>/public/js/achat-form.js"></script>

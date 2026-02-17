@@ -121,7 +121,10 @@ class DashboardController {
             return $aDate < $bDate ? -1 : 1;
         });
 
-        Flight::render('dashboard/index.php', [
+        Flight::render('modele.php', [
+            'contentPage' => 'dashboard/index',
+            'currentPage' => 'dashboard',
+            'pageTitle' => 'Dashboard - BNGRC',
             'dashboard' => $dashboard,
             'totalVilles' => count($villes),
             'totalBesoins' => count($allBesoins),
@@ -129,21 +132,21 @@ class DashboardController {
         ]);
     }
 
-    private function getDispatches() {
-        // Récupérer tous les dispatches
-        try {
-            $pdo = new \PDO(
-                "mysql:host=localhost;dbname=bngrc_final_s3;charset=utf8mb4",
-                'root',
-                '',
-                [\PDO::ATTR_ERRMODE => \PDO::ERRMODE_EXCEPTION]
-            );
-            $stmt = $pdo->query("SELECT * FROM dispatch");
-            return $stmt->fetchAll(\PDO::FETCH_ASSOC);
-        } catch (\Exception $e) {
-            return [];
-        }
-    }
+    // private function getDispatches() {
+    //     // Récupérer tous les dispatches
+    //     try {
+    //         $pdo = new \PDO(
+    //             "mysql:host=localhost;dbname=bngrc_final_s3;charset=utf8mb4",
+    //             'root',
+    //             '',
+    //             [\PDO::ATTR_ERRMODE => \PDO::ERRMODE_EXCEPTION]
+    //         );
+    //         $stmt = $pdo->query("SELECT * FROM dispatch");
+    //         return $stmt->fetchAll(\PDO::FETCH_ASSOC);
+    //     } catch (\Exception $e) {
+    //         return [];
+    //     }
+    // }
 
     public function simulate() {
         $donModel = new Don();

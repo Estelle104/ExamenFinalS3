@@ -1,43 +1,39 @@
 <section class="list-section">
     <div class="list-container">
         <div class="list-header">
-            <h2>Liste des Villes</h2>
-            <a href="<?php echo Flight::get('flight.base_url'); ?>/villes/add" class="btn-add">Ajouter une ville</a>
+            <h2>Liste des Achats Effectué</h2>
+            <a href="<?php echo Flight::get('flight.base_url'); ?>/achat/add" class="btn-add">Ajouter un achat</a>
         </div>
 
         <div class="list-content">
-            <?php 
-            use app\models\Ville;
-            $villeModel = new Ville();
-            $villes = $villeModel->getAllVilles();
-            
-            if (!empty($villes)): 
-            ?>
+            <?php if (!empty($achats)): ?>
                 <table class="list-table">
                     <thead>
                         <tr>
                             <th>ID</th>
-                            <th>Nom</th>
-                            <th>Région</th>
-                            <th>Actions</th>
+                            <th>Produit</th>
+                            <th>Ville</th>
+                            <th>Quantité</th>
+                            <th>Montant Total</th>
+                            <th>Date d'achat</th>
                         </tr>
                     </thead>
                     <tbody>
-                        <?php foreach ($villes as $ville): ?>
+                        <?php foreach ($achats as $achat): ?>
                             <tr>
-                                <td><?php echo htmlspecialchars($ville['id']); ?></td>
-                                <td><?php echo htmlspecialchars($ville['nom']); ?></td>
-                                <td><?php echo htmlspecialchars($ville['region_nom'] ?? 'N/A'); ?></td>
-                                <td>
-                                    <a href="<?php echo Flight::get('flight.base_url'); ?>/dashboard" class="btn-view">Voir</a>
-                                </td>
+                                <td><?php echo htmlspecialchars((string)$achat['id']); ?></td>
+                                <td><?php echo htmlspecialchars($achat['produit_nom'] ?? 'N/A'); ?></td>
+                                <td><?php echo htmlspecialchars($achat['ville_nom'] ?? 'N/A'); ?></td>
+                                <td><?php echo htmlspecialchars((string)$achat['quantite']); ?></td>
+                                <td><?php echo htmlspecialchars($achat['montant_total'] ?? 'N/A'); ?></td>
+                                <td><?php echo htmlspecialchars($achat['date_achat'] ?? 'N/A'); ?></td>
                             </tr>
                         <?php endforeach; ?>
                     </tbody>
                 </table>
             <?php else: ?>
                 <div class="no-data">
-                    <p>Aucune ville trouvée.</p>
+                    <p>Aucun achat trouvé.</p>
                 </div>
             <?php endif; ?>
         </div>

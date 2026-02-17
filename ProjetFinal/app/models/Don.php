@@ -59,6 +59,9 @@ class Don extends Db
             $this->execute("UPDATE besoins SET quantite_restante = quantite, etat = 'En attente'");
             $this->execute("DELETE FROM dispatch");
 
+            // Appliquer les achats (sur argent) avant l'allocation des dons
+            $this->applyAchatsSurBesoinsSameConnection();
+
             $dons = $this->execute(
                 "SELECT * FROM {$this->table} ORDER BY date_don ASC, id ASC"
             )->fetchAll(PDO::FETCH_ASSOC);
@@ -243,6 +246,58 @@ class Don extends Db
             return 1;
         } catch (PDOException $e) {
             return 0;
+        }
+    }
+
+    /**
+     * Applique tous les achats sur les besoins en utilisant la même connexion (évite les locks).
+     */
+    private function applyAchatsSurBesoinsSameConnection(): void
+    {
+        $achats = $this->execute("SELECT * FROM achats ORDER BY date_achat ASC, id ASC")
+            ->fetchAll(PDO::FETCH_ASSOC);
+
+        foreach ($achats as $achat) {
+            $this->applyAchatToBesoinsSameConnection(
+                (int) $achat['id_produit'],
+                $achat['id_ville'] ? (int) $achat['id_ville'] : null,
+                (int) $achat['quantite']
+            );
+        }
+    }
+
+    /**
+     * Applique un achat aux besoins (plus anciens d'abord) avec la même connexion.
+     */
+    private function applyAchatToBesoinsSameConnection(int $idProduit, ?int $idVille, int $quantite): void
+    {
+        $sql = "SELECT * FROM besoins WHERE id_produit = ? AND COALESCE(quantite_restante, quantite) > 0 ";
+        $params = [$idProduit];
+        if ($idVille !== null) {
+            $sql .= "AND id_ville = ? ";
+            $params[] = $idVille;
+        }
+        $sql .= "ORDER BY COALESCE(date_besoin, '0000-00-00') ASC, id ASC";
+
+        $besoins = $this->execute($sql, $params)->fetchAll(PDO::FETCH_ASSOC);
+
+        $remaining = $quantite;
+        foreach ($besoins as $besoin) {
+            if ($remaining <= 0) {
+                break;
+            }
+
+            $restantBesoin = (int) ($besoin['quantite_restante'] ?? $besoin['quantite']);
+            if ($restantBesoin <= 0) {
+                $this->updateEtatBesoin((int) $besoin['id'], (int) $besoin['quantite'], 0);
+                continue;
+            }
+
+            $utilise = min($remaining, $restantBesoin);
+            $restantBesoin -= $utilise;
+            $remaining -= $utilise;
+
+            $this->updateEtatBesoin((int) $besoin['id'], (int) $besoin['quantite'], $restantBesoin);
         }
     }
 }

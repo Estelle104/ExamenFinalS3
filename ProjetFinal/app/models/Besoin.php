@@ -63,4 +63,63 @@ class Besoin extends Db
         $sql = "SELECT * FROM {$this->table} ORDER BY date_besoin ASC";
         return $this->execute($sql)->fetchAll(PDO::FETCH_ASSOC);
     }
+
+    /**
+     * Liste des produits qui ont des besoins restants (optionnellement filtrés par ville).
+     * @return array Liste des produits avec quantite_restante_totale.
+     */
+    public function getProduitsAvecBesoins(?int $idVille = null): array
+    {
+        $sql = "SELECT p.id, p.nom,
+                       COALESCE(SUM(COALESCE(b.quantite_restante, b.quantite)), 0) AS quantite_restante_totale
+                FROM {$this->table} b
+                INNER JOIN produits p ON p.id = b.id_produit
+                WHERE COALESCE(b.quantite_restante, b.quantite) > 0 ";
+        $params = [];
+
+        if ($idVille !== null) {
+            $sql .= "AND b.id_ville = ? ";
+            $params[] = $idVille;
+        }
+
+        $sql .= "GROUP BY p.id, p.nom ORDER BY p.nom ASC";
+        return $this->execute($sql, $params)->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+    /**
+     * Total restant pour un produit (optionnellement filtré par ville).
+     */
+    public function getTotalRestantByProduit(?int $idProduit, ?int $idVille = null): int
+    {
+        $sql = "SELECT COALESCE(SUM(COALESCE(quantite_restante, quantite)), 0) AS total
+                FROM {$this->table}
+                WHERE id_produit = ? ";
+        $params = [$idProduit];
+
+        if ($idVille !== null) {
+            $sql .= "AND id_ville = ? ";
+            $params[] = $idVille;
+        }
+
+        $row = $this->execute($sql, $params)->fetch(PDO::FETCH_ASSOC);
+        return (int) ($row['total'] ?? 0);
+    }
+
+    /**
+     * Récupère les besoins par produit (optionnellement filtré par ville), du plus ancien au plus récent.
+     */
+    public function getBesoinsPourAchat(int $idProduit, ?int $idVille = null): array
+    {
+        $sql = "SELECT * FROM {$this->table}
+                WHERE id_produit = ? AND COALESCE(quantite_restante, quantite) > 0 ";
+        $params = [$idProduit];
+
+        if ($idVille !== null) {
+            $sql .= "AND id_ville = ? ";
+            $params[] = $idVille;
+        }
+
+        $sql .= "ORDER BY COALESCE(date_besoin, '0000-00-00') ASC, id ASC";
+        return $this->execute($sql, $params)->fetchAll(PDO::FETCH_ASSOC);
+    }
 }
