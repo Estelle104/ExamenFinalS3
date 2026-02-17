@@ -74,6 +74,9 @@ $router->group('', function(Router $router) use ($app) {
     $router->get('/dons', [DonController::class, 'list']);
     $router->get('/dons/add', [DonController::class, 'add']);
     $router->post('/dons/add', [DonController::class, 'add']);
+    $router->get('/dons/edit/@id', [DonController::class, 'edit']);
+    $router->post('/dons/edit/@id', [DonController::class, 'edit']);
+    $router->get('/dons/delete/@id', [DonController::class, 'delete']);
 
     // Dashboard - l'objectif principal
     $router->get('/dashboard', [DashboardController::class, 'index']);

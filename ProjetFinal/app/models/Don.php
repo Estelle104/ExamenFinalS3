@@ -41,6 +41,55 @@ class Don extends Db
     }
 
     /**
+     * Récupère un don par son ID.
+     */
+    public function getDonById(int $id): ?array
+    {
+        $sql = "SELECT d.*, p.nom AS produit_nom, v.nom AS ville_nom, r.nom AS region_nom
+                FROM {$this->table} d
+                LEFT JOIN produits p ON p.id = d.id_produit
+                LEFT JOIN villes v ON v.id = d.id_ville
+                LEFT JOIN regions r ON r.id = d.id_region
+                WHERE d.id = ?";
+        $result = $this->execute($sql, [$id])->fetch(PDO::FETCH_ASSOC);
+        return $result ?: null;
+    }
+
+    /**
+     * Met à jour un don.
+     */
+    public function updateDon(
+        int $id,
+        string $description,
+        int $idProduit,
+        ?int $idVille,
+        int $quantite,
+        ?string $dateDon,
+        string $donneur,
+        ?int $idRegion = null
+    ): bool {
+        $dateDon = $dateDon ?: date('Y-m-d');
+        $sql = "UPDATE {$this->table} 
+                SET description = ?, id_produit = ?, id_ville = ?, id_region = ?, quantite = ?, date_don = ?, donneur = ?
+                WHERE id = ?";
+        $this->execute($sql, [$description, $idProduit, $idVille, $idRegion, $quantite, $dateDon, $donneur, $id]);
+        return true;
+    }
+
+    /**
+     * Supprime un don.
+     */
+    public function deleteDon(int $id): bool
+    {
+        // Supprimer d'abord les dispatch liés
+        $this->execute("DELETE FROM dispatch WHERE id_don = ?", [$id]);
+        // Puis supprimer le don
+        $sql = "DELETE FROM {$this->table} WHERE id = ?";
+        $this->execute($sql, [$id]);
+        return true;
+    }
+
+    /**
      * Simule l'attribution des dons aux besoins compatibles.
      */
     /**
