@@ -37,4 +37,11 @@ class Produit extends Db
         $row = $this->execute($sql, [$idProduit])->fetch(PDO::FETCH_ASSOC);
         return $row ? (float) $row['prix_unitaire'] : null;
     }
+
+    public function getProduitById(int $id): ?array
+    {
+        $sql = "SELECT * FROM {$this->table} WHERE id = ?";
+        $row = $this->execute($sql, [$id])->fetch(PDO::FETCH_ASSOC);
+        return $row ?: null;
+    }
 }

@@ -1,3 +1,13 @@
+<?php 
+    use app\models\Besoin;
+    use app\models\Ville;
+    use app\models\Produit;
+
+    $besoinModel = new Besoin();
+    $villeModel = new Ville();
+    $produitModel = new Produit();
+
+?>
 <section class="list-section">
     <div class="list-container">
         <div class="list-header">
@@ -7,8 +17,6 @@
 
         <div class="list-content">
             <?php 
-            use app\models\Besoin;
-            $besoinModel = new Besoin();
             $besoins = $besoinModel->getAllBesoins();
             
             if (!empty($besoins)): 
@@ -26,11 +34,15 @@
                     </thead>
                     <tbody>
                         <?php foreach ($besoins as $besoin): ?>
+                            <?php
+                                $produit = $produitModel->getProduitById($besoin['id_produit']);
+                                $ville = $villeModel->getVilleById($besoin['id_ville']);
+                            ?>
                             <tr>
                                 <td><?php echo htmlspecialchars((string)$besoin['id']); ?></td>
                                 <td><?php echo htmlspecialchars($besoin['description']); ?></td>
-                                <td><?php echo htmlspecialchars($besoin['id_produit'] ?? 'N/A'); ?></td>
-                                <td><?php echo htmlspecialchars($besoin['id_ville'] ?? 'N/A'); ?></td>
+                                <td><?php echo htmlspecialchars($produit['nom'] ?? 'N/A'); ?></td>
+                                <td><?php echo htmlspecialchars($ville['nom'] ?? 'N/A'); ?></td>
                                 <td><?php echo htmlspecialchars((string)$besoin['quantite']); ?></td>
                                 <td>
                                     <a href="<?php echo Flight::get('flight.base_url'); ?>/dashboard" class="btn-view">Voir</a>
